@@ -8,7 +8,7 @@ class Map
 
   public static function mailAfterPurchase($params, $context)
   {
-
+    $_ds = defined('DS') ? DS : '/';
     $app_key = Configuration::get($context->name.'_app_key');
     $secret = Configuration::get($context->name.'_oauth_token');
     $enable_feature = Configuration::get($context->name.'_map_enabled');
@@ -19,22 +19,27 @@ class Map
       return;
     }
     
-    $OAuthStorePath = _PS_ROOT_DIR_ . _MODULE_DIR_ . $context->name . DS . 'lib'. DS .'oauth-php' . DS . 'library' . DS . 'OAuthStore.php';
-    $OAuthRequesterPath = _PS_ROOT_DIR_ .  _MODULE_DIR_ . $context->name . DS . 'lib'. DS .'oauth-php' . DS . 'library' . DS . 'OAuthRequester.php';
+    $OAuthStorePath = _PS_ROOT_DIR_ . _MODULE_DIR_ . $context->name . $_ds . 'lib'. $_ds .'oauth-php' . $_ds . 'library' . $_ds . 'OAuthStore.php';
+    $OAuthRequesterPath = _PS_ROOT_DIR_ .  _MODULE_DIR_ . $context->name . $_ds . 'lib'. $_ds .'oauth-php' . $_ds . 'library' . $_ds . 'OAuthRequester.php';
 
     require_once ($OAuthStorePath);
     require_once ($OAuthRequesterPath);
 
     $data = array();
-
-    $customer = new Customer((int)$params['cart']->id_customer);
-
+    $customer = NULL;
+    if(isset($params['cart']))
+      $customer = new Customer((int)$params['cart']->id_customer);
+    else
+    {
+      $order = new Order((int)$params['id_order']);
+      $customer = new Customer((int)$order->id_customer);
+    }
     $data["email"] = $customer->email;
     $data["customer_name"] = $customer->firstname . ' ' . $customer->lastname;
     $data["order_id"] = $params['id_order'];
     $data['platform'] = 'prestashop';
 
-    $products = OrderDetail::getList($params['id_order']);
+    $products = method_exists('OrderDetail', 'getList') ? OrderDetail::getList($params['id_order']) : Db::getInstance()->executeS('SELECT * FROM `'._DB_PREFIX_.'order_detail` WHERE `id_order` = '.(int)$params['id_order']);
     $products_arr = array();
 
     foreach ($products as $product) {
@@ -75,7 +80,7 @@ class Map
           'content' => $parsed_data
         )
       );
-      $feed_url = self::YOTPO_API_URL . DS . $app_key . "/purchases/";
+      $feed_url = self::YOTPO_API_URL . '/' . $app_key . "/purchases/";
       $stream_context = @stream_context_create($opts); 
       $fp = fopen($feed_url, 'r', false, $stream_context);
     }

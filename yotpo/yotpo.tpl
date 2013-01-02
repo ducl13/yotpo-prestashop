@@ -2,8 +2,8 @@
 <div id="yotpo_block_left" class="block">
 
   <div class="yotpo reviews" 
-  	   data-appkey={$yotpoAppkey}
-  	   data-domain={$yotpoDomain}
+  	   data-appkey="{$yotpoAppkey}"
+  	   data-domain="{$yotpoDomain}"
   	   data-product-id="{$yotpoProductId}"
   	   data-product-models="{$yotpoProductModel}" 
   	   data-name="{$yotpoProductName}" 

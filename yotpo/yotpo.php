@@ -11,7 +11,7 @@ class Yotpo extends Module
     {
       // version test
       $version_mask = explode('.', _PS_VERSION_, 3);
-      $version_test = $version_mask[0] > 0 && $version_mask[1] > 3;
+      $version_test = $version_mask[0] > 0 && $version_mask[1] > 4;
 
       $this->name = 'yotpo';
       $this->tab = $version_test ? 'advertising_marketing' : 'Yotpo';
@@ -30,12 +30,35 @@ class Yotpo extends Module
  
   public function install()
   {
+    $version_mask = explode('.', _PS_VERSION_, 3);
+    $version_test = $version_mask[0] > 0 && $version_mask[1] > 4;
     //TODO make the second or part to be valid only if map check box is checked.
-    if (parent::install() == false OR !$this->registerHook('displayFooterProduct') 
-                                   OR !$this->registerHook('actionPaymentConfirmation')) {
-      return false;
+    if($version_test)
+    {
+      
+      if (parent::install() == false OR !$this->registerHook('displayFooterProduct') 
+                                     OR !$this->registerHook('actionPaymentConfirmation')) {
+        return false;
+      }
+    }
+    else
+    {
+      if (parent::install() == false OR !$this->registerHook('productfooter') 
+                                     OR !$this->registerHook('paymentConfirm')) {
+        return false;  
+      }  
     }
     return true;
+  }
+
+  public function hookpaymentConfirm($params)
+  {
+    $this->hookActionPaymentConfirmation($params);    
+  }
+
+  public function hookproductfooter($params)
+  {
+    return $this->hookdisplayFooterProduct($params);    
   }
 
   public function hookdisplayFooterProduct($params)
@@ -43,19 +66,25 @@ class Yotpo extends Module
 
     global $smarty;
     $product = $params['product'];
-// $this->logConsole('product   ====  ', json_encode($product->upc), false);
     $smarty->assign('yotpoAppkey', Configuration::get($this->name.'_app_key'));
     $smarty->assign('yotpoProductId', $product->id);
     $smarty->assign('yotpoProductName', strip_tags(nl2br($product->name)));
     $smarty->assign('yotpoProductDescription', strip_tags(nl2br($product->description)));
-    $smarty->assign('yotpoProductImageUrl', $this->_getProductImageUrl($product->id));
-    $smarty->assign('yotpoDomain', Tools::getShopDomain(false,false));
+    $smarty->assign('yotpoDomain', $this->_getShopDomain());
     $smarty->assign('yotpoProductModel', $this->_getProductModel($product));
+    $smarty->assign('yotpoProductImageUrl', $this->_getProductImageUrl($product->id));
     $smarty->assign('yotpoProductBreadCrumbs', $this->_getBreadCrumbs($product));
-    
+
     // TODO check if can insert this in header part so it will be loaded only once
     echo "<script src ='http://www.yotpo.com/js/yQuery.js'></script>";
     return $this->display(__FILE__,'yotpo.tpl');
+  }
+
+  private function _getShopDomain()
+  {
+    if(method_exists('Tools', 'getShopDomain'))
+      return Tools::getShopDomain(false,false);
+    return str_replace('www.', '', $_SERVER['HTTP_HOST']);;
   }
 
   public function hookActionPaymentConfirmation($params)
@@ -70,7 +99,8 @@ class Yotpo extends Module
     if (sizeof($id_image) > 0) {
         $image = new Image($id_image['id_image']);
         // get image full URL
-        return $image_url = _PS_BASE_URL_._THEME_PROD_DIR_.$image->getExistingImgPath().".jpg";
+
+        return $image_url = method_exists($image, 'getExistingImgPath') ? _PS_BASE_URL_._THEME_PROD_DIR_.$image->getExistingImgPath().".jpg" : NULL;
     }  
     return NULL;
   }
@@ -171,6 +201,8 @@ class Yotpo extends Module
 
   private function _getBreadCrumbs($product)
   {
+   if (!method_exists('Product', 'getProductCategoriesFull'))
+    return ''; 
    $result = '';
    $all_product_subs = Product::getProductCategoriesFull($product->id, $this->context->language->id);
    $all_product_subs_path = array();
