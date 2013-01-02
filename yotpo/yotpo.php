@@ -162,11 +162,12 @@ class Yotpo extends Module
           <input type="text" name="yotpo_oauth_token" value="'.Tools::getValue('yotpo_oauth_token', Configuration::get($this->name.'_oauth_token')).'"/>
         </div>
 
+    <label>'.$this->l('Mail after purchase'). '</label>
         <div class="margin-form">
           <input type="checkbox" name="yotpo_map_enabled" value="yotpo_map_enabled" ';
           if($yotpo_map_enabled == true)
             $this->_html .= 'checked=checked';
-          $this->_html .= ''.$this->l('Mail after purchase'). '<br>
+          $this->_html .= '</input>
         </div>
         <input type="submit" name="submit" value="'.$this->l('Update').'" class="button" />
       </fieldset>
