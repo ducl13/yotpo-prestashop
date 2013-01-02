@@ -100,9 +100,18 @@ class Yotpo extends Module
         $image = new Image($id_image['id_image']);
         // get image full URL
 
-        return $image_url = method_exists($image, 'getExistingImgPath') ? _PS_BASE_URL_._THEME_PROD_DIR_.$image->getExistingImgPath().".jpg" : NULL;
+        return $image_url = method_exists($image, 'getExistingImgPath') ? _PS_BASE_URL_._THEME_PROD_DIR_.$image->getExistingImgPath().".jpg" : $this->getExistingImgPath($image);
     }  
     return NULL;
+  }
+
+
+  public function getExistingImgPath($image)
+  {
+    if (!$image->id)
+      return NULL;
+    if (file_exists(_PS_PROD_IMG_DIR_.$image->id_product.'-'.$image->id.'.jpg'))
+      return _PS_BASE_URL_._THEME_PROD_DIR_.$image->id_product.'-'.$image->id.'.'.'jpg';     
   }
 
   public function uninstall()
