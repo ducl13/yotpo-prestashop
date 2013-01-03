@@ -92,7 +92,7 @@ class Yotpo extends Module
 
   public function uninstall()
   {
-    if (!parent::uninstall())
+    if (!parent::uninstall() OR !Configuration::deleteByName($this->name.'_app_key') OR !Configuration::deleteByName($this->name.'_oauth_token') OR !Configuration::deleteByName($this->name.'_map_enabled'))
       Db::getInstance()->Execute('DELETE FROM `'._DB_PREFIX_.'yotpo`');
     parent::uninstall();
   }
@@ -115,39 +115,21 @@ class Yotpo extends Module
         }
       }
     }
-    $this->_displayForm();
+    $this->_displaySettingsForm();
     return $this->_html;
   }
 
 // module settings
-  private function _displayForm()
+  private function _displaySettingsForm()
   {
-    $yotpo_map_enabled = Configuration::get($this->name.'_map_enabled') == "0" ? false : true;
-    
-    $this->_html .= '<h2>'.$this->displayName.'</h2>';
-    $this->_html .= '
-    <form action="'.$_SERVER['REQUEST_URI'].'" method="post">
-      <fieldset>
-        <legend><img src="../img/admin/cog.gif" alt="" class="middle" />'.$this->l('Settings').'</legend>
-        <label>'.$this->l('App key').'</label>
-        <div class="margin-form">
-          <input type="text" name="yotpo_app_key" value="'.Tools::getValue('yotpo_app_key', Configuration::get($this->name.'_app_key')).'"/>
-        </div>
-        <label>'.$this->l('Secret token').'</label>
-        <div class="margin-form">
-          <input type="text" name="yotpo_oauth_token" value="'.Tools::getValue('yotpo_oauth_token', Configuration::get($this->name.'_oauth_token')).'"/>
-        </div>
-
-    <label>'.$this->l('Mail after purchase'). '</label>
-        <div class="margin-form">
-          <input type="checkbox" name="yotpo_map_enabled" value="yotpo_map_enabled" ';
-          if($yotpo_map_enabled == true)
-            $this->_html .= 'checked=checked';
-          $this->_html .= '</input>
-        </div>
-        <input type="submit" name="submit" value="'.$this->l('Update').'" class="button" />
-      </fieldset>
-    </form>';
+  
+    global $smarty;
+    $smarty->assign(array(
+        'action' => Tools::safeOutput($_SERVER['REQUEST_URI']),
+        'appKey' => Tools::safeOutput(Tools::getValue('yotpo_app_key',Configuration::get($this->name.'_app_key'))),
+        'oauthToken' => Tools::safeOutput(Tools::getValue('yotpo_oauth_token',Configuration::get($this->name.'_oauth_token'))),
+        'mapEnabled' => Configuration::get($this->name.'_map_enabled') == "0" ? false : true));
+    $this->_html .= $this->display(__FILE__, 'settingsForm.tpl');
   }
 
   private function _postValidation()
