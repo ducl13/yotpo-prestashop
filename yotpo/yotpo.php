@@ -18,7 +18,7 @@ class Yotpo extends Module
       $this->version = 1.0;
       if($version_test)
         $this->author = 'Alon';
-      $this->need_instance = 1;
+      $this->need_instance = 0;
  
       parent::__construct();
    
@@ -68,8 +68,8 @@ class Yotpo extends Module
     $product = $params['product'];
     $smarty->assign('yotpoAppkey', Configuration::get($this->name.'_app_key'));
     $smarty->assign('yotpoProductId', $product->id);
-    $smarty->assign('yotpoProductName', strip_tags(nl2br($product->name)));
-    $smarty->assign('yotpoProductDescription', strip_tags(nl2br($product->description)));
+    $smarty->assign('yotpoProductName', strip_tags($product->name));
+    $smarty->assign('yotpoProductDescription', strip_tags($product->description));
     $smarty->assign('yotpoDomain', $this->_getShopDomain());
     $smarty->assign('yotpoProductModel', $this->_getProductModel($product));
     $smarty->assign('yotpoProductImageUrl', $this->_getProductImageUrl($product->id));
