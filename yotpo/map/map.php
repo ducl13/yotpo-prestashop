@@ -50,7 +50,7 @@ class Map
       $product_data['url'] = $full_product->getLink();  
       $product_data['name'] = $full_product->name;
       $product_data['image'] = $context->_getProductImageUrl($product['product_id']);
-      $product_data['description'] = strip_tags(nl2br($full_product->description));
+      $product_data['description'] = strip_tags($full_product->description);
 
       $products_arr[$product['product_id']] = $product_data;
     }
