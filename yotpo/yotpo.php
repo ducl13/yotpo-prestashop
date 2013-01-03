@@ -25,43 +25,18 @@ class Yotpo extends Module
       $this->displayName = $this->l('Yotpo');
       $this->description = $this->l('Allow MAP');
 
-      include_once(_PS_MODULE_DIR_.'yotpo/map/map.php');
     }
  
   public function install()
   {
-    $version_mask = explode('.', _PS_VERSION_, 3);
-    $version_test = $version_mask[0] > 0 && $version_mask[1] > 4;
-    //TODO make the second or part to be valid only if map check box is checked.
-    if($version_test)
-    {
-      
-      if (parent::install() == false OR !$this->registerHook('displayFooterProduct') 
-                                     OR !$this->registerHook('actionPaymentConfirmation')) {
-        return false;
-      }
-    }
-    else
-    {
-      if (parent::install() == false OR !$this->registerHook('productfooter') 
-                                     OR !$this->registerHook('paymentConfirm')) {
-        return false;  
-      }  
-    }
+    if (parent::install() == false OR !$this->registerHook('productfooter') 
+                                   OR !$this->registerHook('paymentConfirm')) {
+      return false;  
+    }  
     return true;
   }
 
-  public function hookpaymentConfirm($params)
-  {
-    $this->hookActionPaymentConfirmation($params);    
-  }
-
   public function hookproductfooter($params)
-  {
-    return $this->hookdisplayFooterProduct($params);    
-  }
-
-  public function hookdisplayFooterProduct($params)
   {
 
     global $smarty;
@@ -87,8 +62,9 @@ class Yotpo extends Module
     return str_replace('www.', '', $_SERVER['HTTP_HOST']);;
   }
 
-  public function hookActionPaymentConfirmation($params)
+  public function hookpaymentConfirm($params)
   {
+    include_once(_PS_MODULE_DIR_.'yotpo/map/map.php');
     Map::mailAfterPurchase($params, $this);
   }
 

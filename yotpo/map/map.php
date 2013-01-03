@@ -3,7 +3,7 @@ class Map
 {
   const YOTPO_OAUTH_TOKEN_URL = "https://api.yotpo.com/oauth/token";
   const YOTPO_API_URL = "https://api.yotpo.com/apps";
-  const HTTP_REQUEST_TIMEOUT = 30;
+  const HTTP_REQUEST_TIMEOUT = 15;
 
 
   public static function mailAfterPurchase($params, $context)
@@ -39,7 +39,7 @@ class Map
     $data["order_id"] = $params['id_order'];
     $data['platform'] = 'prestashop';
 
-    $products = method_exists('OrderDetail', 'getList') ? OrderDetail::getList($params['id_order']) : Db::getInstance()->executeS('SELECT * FROM `'._DB_PREFIX_.'order_detail` WHERE `id_order` = '.(int)$params['id_order']);
+    $products = Map::_getOrderDetails($params['id_order']);
     $products_arr = array();
 
     foreach ($products as $product) {
@@ -69,25 +69,36 @@ class Map
 
       $response = $result['body'];
       $tokenParams = json_decode($result['body'], true);
-      $data['utoken'] = $tokenParams['access_token'];
-      $parsed_data = http_build_query($data);
-      $opts = array(
-        'http'=>array(
-          'method'=>"POST",
-          'timeout' => self::HTTP_REQUEST_TIMEOUT,
-          'header'=> "Content-type: application/x-www-form-urlencoded\r\n" .
-                     "Content-Length: " . strlen($parsed_data) . "\r\n",
-          'content' => $parsed_data
-        )
-      );
-      $feed_url = self::YOTPO_API_URL . '/' . $app_key . "/purchases/";
-      $stream_context = @stream_context_create($opts); 
-      $fp = fopen($feed_url, 'r', false, $stream_context);
+      
+      if(isset($tokenParams['access_token']))
+      {
+        $data['utoken'] = $tokenParams['access_token'];
+        $parsed_data = json_encode($data);
+        $opts = array(
+          'http'=>array(
+            'method'=>"POST",
+            'timeout' => self::HTTP_REQUEST_TIMEOUT,
+            'header'=> "Content-type: application/json\r\n" .
+                       "Content-Length: " . strlen($parsed_data) . "\r\n",
+            'content' => $parsed_data
+          )
+        );
+        $feed_url = self::YOTPO_API_URL . '/' . $app_key . "/purchases/";
+        $stream_context = @stream_context_create($opts); 
+        $fp = fopen($feed_url, 'r', false, $stream_context);
+      }
     }
     catch(OAuthException2 $e)
-    {
-      throw new Exception($e);   
+    {//Do nothing
     }
+  }
+
+  private static function _getOrderDetails($id_order)
+  {
+    if(method_exists('OrderDetail', 'getList'))
+      return OrderDetail::getList($id_order);
+    else
+      return Db::getInstance()->executeS('SELECT * FROM `'._DB_PREFIX_.'order_detail` WHERE `id_order` = '.(int)$id_order);  
   }
 }
 ?>
