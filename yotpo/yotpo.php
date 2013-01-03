@@ -25,7 +25,7 @@ class Yotpo extends Module
       $this->displayName = $this->l('Yotpo');
       $this->description = $this->l('Allow MAP');
 
-      require(_PS_MODULE_DIR_.'yotpo/map/map.php');
+      include_once(_PS_MODULE_DIR_.'yotpo/map/map.php');
     }
  
   public function install()
