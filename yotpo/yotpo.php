@@ -6,7 +6,7 @@ class Yotpo extends Module
 {
 
   private $_html = '';
-  private $_httpRequest = NULL;
+  private $_httpClient = NULL;
   public function __construct()
     {
       // version test
@@ -17,13 +17,16 @@ class Yotpo extends Module
       $this->tab = $version_test ? 'advertising_marketing' : 'Yotpo';
       $this->version = 1.0;
       if($version_test)
-        $this->author = 'Alon';
+        $this->author = 'Yotpo';
       $this->need_instance = 0;
  
       parent::__construct();
    
       $this->displayName = $this->l('Yotpo');
       $this->description = $this->l('Allow MAP');
+
+      include_once(_PS_MODULE_DIR_.'yotpo/httpClient.php');
+      $this->_httpClient = new YotpoHttpClient($this->name);
     }
  
   public function install()
@@ -78,12 +81,7 @@ class Yotpo extends Module
     if(($app_key == null) or ($secret == null) or $enable_feature == "0" || $enable_feature == NULL)
       return;
 
-    if($this->_httpRequest == NULL)
-    {
-      include_once(_PS_MODULE_DIR_.'yotpo/httpRequest.php');
-      $this->_httpRequest = new YotpoHttpRequest($this->name);
-    }
-    $this->_httpRequest->makeMapRequest($params, $app_key, $secret, $this);
+    $this->_httpClient->makeMapRequest($params, $app_key, $secret, $this);
   }
 
   public function _getProductImageUrl($id_product)
@@ -118,7 +116,7 @@ class Yotpo extends Module
 
   public function uninstall()
   {
-    if (!parent::uninstall() OR !Configuration::deleteByName($this->name.'_app_key') OR !Configuration::deleteByName($this->name.'_oauth_token') OR !Configuration::deleteByName($this->name.'_map_enabled'))
+    if (!parent::uninstall() OR !Configuration::deleteByName('yotpo_app_key') OR !Configuration::deleteByName('yotpo_oauth_token') OR !Configuration::deleteByName('yotpo_map_enabled'))
       Db::getInstance()->Execute('DELETE FROM `'._DB_PREFIX_.'yotpo`');
     parent::uninstall();
   }
@@ -128,6 +126,8 @@ class Yotpo extends Module
   {
     if (!function_exists('curl_init'))
       return '<div class="error">'.$this->l('Yotpo needs the PHP Curl extension, please ask your hosting provider to enable it prior to use this module.').'</div>';
+
+    $this->context->controller->addCSS($this->_path.'/css/form.css', 'all');
     $this->_processRegistrationForm();
     $this->_processSettingsForm();
     $this->_displayForm();
@@ -154,17 +154,12 @@ class Yotpo extends Module
       if ($name === false || $name === '')
         return $this->_prepareError($this->l('Name is missing'));
 
-      if($this->_httpRequest == NULL)
-      {
-        include_once(_PS_MODULE_DIR_.'yotpo/httpRequest.php');
-        $this->_httpRequest = new YotpoHttpRequest($this->name);
-      }
-      $response = $this->_httpRequest->register($email, $name, $password, _PS_BASE_URL_);      
+      $response = $this->_httpClient->register($email, $name, $password, _PS_BASE_URL_);      
       if($response['status']['code'] == 200)
       {
         Configuration::updateValue('yotpo_app_key', $response['response']['app_key'], false);
         Configuration::updateValue('yotpo_oauth_token', $response['response']['secret'], false);
-        $accountPlatformResponse = $this->_httpRequest->createAcountPlatform($response['response']['app_key'], $response['response']['secret'], _PS_BASE_URL_);        
+        $accountPlatformResponse = $this->_httpClient->createAcountPlatform($response['response']['app_key'], $response['response']['secret'], _PS_BASE_URL_);        
         if($response['status']['code'] == 200)
           return $this->_prepareSuccess($this->l('Account successfully created'));  
         else
