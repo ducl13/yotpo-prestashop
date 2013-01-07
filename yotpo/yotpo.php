@@ -31,6 +31,11 @@ class Yotpo extends Module
  
   public function install()
   {
+    if(!Configuration::get('yotpo_map_enabled'))
+    {
+      Configuration::updateValue('yotpo_map_enabled', '1', false);
+    }
+    
     $is_curl_installed = true;
     if (!function_exists('curl_init'))
     {
