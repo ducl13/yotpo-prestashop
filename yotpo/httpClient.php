@@ -1,5 +1,5 @@
 <?php
-class YotpoHttpRequest 
+class YotpoHttpClient 
 {
 	const YOTPO_API_URL = "https://api.yotpo.com";
 	const HTTP_REQUEST_TIMEOUT = 300;

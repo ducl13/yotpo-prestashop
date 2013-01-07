@@ -1,3 +1,5 @@
+  
+   {if !$finishedRegistration}<div class="y-settings-title">To customize the look and feel of the widget, and to edit your Mail After Purchase settings, just head to the <a href="https://api.yotpo.com/users/sign_in" target="_blank">Yotpo Dashboard.</a></div> {/if}
    <div class="y-settings-white-box">
     <form action="{$action}" method="post">
       <div class="y-page-header">
@@ -20,7 +22,10 @@
       </fieldset>
       <div class="y-footer">
         <input type="submit" name="yotpo_settings" value="{l s='Update' mod='yotpo'}" class="y-submit-btn" />
-        <a href="https://api.yotpo.com/users/sign_in" target="_blank"><input type="button"  value="Get cradentials" class="y-submit-btn y-normal-btn"/></a>
+        <a href="https://api.yotpo.com/users/sign_in" class="y-submit-btn y-normal-btn" target="_blank">Get cradentials</a>
       </div>
     </form>
+
     </div>
+    {if $finishedRegistration}<div class="y-settings-title">All set! The Yotpo widget is now properly installed on your shop. </br>
+    To customize the look and feel of the widget, and to edit your Mail After Purchase settings, just head to the <a href="https://api.yotpo.com/users/sign_in" target="_blank">Yotpo Dashboard.</a><//div>{/if}

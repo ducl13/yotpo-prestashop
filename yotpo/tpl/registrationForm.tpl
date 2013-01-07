@@ -41,9 +41,13 @@
         </div>
       </fieldset>
       <div class="y-footer">
-          <input type="submit" name="yotpo_register" value="{l s='Register' mod='yotpo'}" class="y-submit-btn" />
-          <a><input type="submit" name="log_in_button" value="Allready registered?" class="y-submit-btn y-normal-btn" /></a>
-        </div>
+        <input type="submit" name="yotpo_register" value="{l s='Register' mod='yotpo'}" class="y-submit-btn" />
+      </div>
+    </form>
+    <form action="{$action}" method="post">
+      <div class="y-footer">
+        Already using Yotpo? <input type="submit" name="log_in_button" value="click here" class="y-already-logged-in" />
+      </div>
     </form>
   </div>
 </div>

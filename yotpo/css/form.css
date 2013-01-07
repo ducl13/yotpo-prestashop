@@ -12,6 +12,15 @@
 	padding-bottom: 40px;
 	margin: 0 auto;	
 }
+.y-settings-title{
+	width: 650px;
+	color: #8A8A8A;
+	background-color: white;
+	padding-bottom: 13px;
+	margin: 0 auto;
+	font-size: 14px;
+	padding-top: 13px;
+}
 .y-wrapper {
 	width: 680px;
 	margin: 0 auto;
@@ -42,6 +51,14 @@
 .y-side-box {
 	width: 36%;
 	float: right;
+}
+.y-already-logged-in {
+	color: black;
+	margin: 0;
+	padding: 0;
+	background: none;
+	border: none;
+	cursor: pointer;
 }
 .y-side-header {
 	font-size: 14px;

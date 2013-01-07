@@ -196,9 +196,16 @@ class Yotpo extends Module
 
   private function _displayForm()
   {
+    global $smarty;
+    $smarty->assign('finishedRegistration', false);
     if (Tools::isSubmit('log_in_button'))
     {
       return $this->_displaySettingsForm();
+    }
+    if (Tools::isSubmit('yotpo_register'))
+    {
+      global $smarty;
+      $smarty->assign('finishedRegistration', true);
     }
     return Configuration::get('yotpo_app_key') == '' ? $this->_displayRegistrationForm() : $this->_displaySettingsForm();
   }
