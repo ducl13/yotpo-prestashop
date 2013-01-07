@@ -198,8 +198,10 @@ class Yotpo extends Module
   {
     global $smarty;
     $smarty->assign('finishedRegistration', false);
+    $smarty->assign('allreadyUsingYotpo', false);
     if (Tools::isSubmit('log_in_button'))
     {
+      $smarty->assign('allreadyUsingYotpo', true);
       return $this->_displaySettingsForm();
     }
     if (Tools::isSubmit('yotpo_register'))
