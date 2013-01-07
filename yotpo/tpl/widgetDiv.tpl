@@ -1,4 +1,3 @@
-
 <div id="yotpo_block_left" class="block">
 
   <div class="yotpo reviews" 

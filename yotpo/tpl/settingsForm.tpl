@@ -14,6 +14,6 @@
         <div class="margin-form">
           <input type="checkbox" name="yotpo_map_enabled" value="yotpo_map_enabled" {if $mapEnabled}checked="checked"{/if} </>
         </div>
-        <input type="submit" name="submit" value="{l s='Update' mod='yotpo'}" class="button" />
+        <input type="submit" name="yotpo_settings" value="{l s='Update' mod='yotpo'}" class="button" />
       </fieldset>
     </form>

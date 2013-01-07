@@ -6,14 +6,14 @@ class Yotpo extends Module
 {
 
   private $_html = '';
-  private $_postErrors = array();
+  private $_httpRequest = NULL;
   public function __construct()
     {
       // version test
       $version_mask = explode('.', _PS_VERSION_, 3);
       $version_test = $version_mask[0] > 0 && $version_mask[1] > 4;
 
-      $this->name = 'yotpo';
+      $this->name = 'Yotpo';
       $this->tab = $version_test ? 'advertising_marketing' : 'Yotpo';
       $this->version = 1.0;
       if($version_test)
@@ -24,12 +24,18 @@ class Yotpo extends Module
    
       $this->displayName = $this->l('Yotpo');
       $this->description = $this->l('Allow MAP');
-
     }
  
   public function install()
   {
-    if (parent::install() == false OR !$this->registerHook('productfooter') 
+    $is_curl_installed = true;
+    if (!function_exists('curl_init'))
+    {
+      $is_curl_installed = false;
+      if (isset($this->_errors))
+        $this->_errors[] = $this->l('Yotpo needs the PHP Curl extension, please ask your hosting provider to enable it prior to install this module.');
+    }
+    if (!$is_curl_installed || parent::install() == false OR !$this->registerHook('productfooter') 
                                    OR !$this->registerHook('paymentConfirm')) {
       return false;  
     }  
@@ -41,7 +47,7 @@ class Yotpo extends Module
 
     global $smarty;
     $product = $params['product'];
-    $smarty->assign('yotpoAppkey', Configuration::get($this->name.'_app_key'));
+    $smarty->assign('yotpoAppkey', Configuration::get('yotpo_app_key'));
     $smarty->assign('yotpoProductId', $product->id);
     $smarty->assign('yotpoProductName', strip_tags($product->name));
     $smarty->assign('yotpoProductDescription', strip_tags($product->description));
@@ -52,7 +58,7 @@ class Yotpo extends Module
 
     // TODO check if can insert this in header part so it will be loaded only once
     echo "<script src ='http://www.yotpo.com/js/yQuery.js'></script>";
-    return $this->display(__FILE__,'yotpo.tpl');
+    return $this->display(__FILE__,'tpl/widgetDiv.tpl');
   }
 
   private function _getShopDomain()
@@ -64,8 +70,20 @@ class Yotpo extends Module
 
   public function hookpaymentConfirm($params)
   {
-    include_once(_PS_MODULE_DIR_.'yotpo/map/map.php');
-    Map::mailAfterPurchase($params, $this);
+    $app_key = Configuration::get('yotpo_app_key');
+    $secret = Configuration::get('yotpo_oauth_token');
+    $enable_feature = Configuration::get('yotpo_map_enabled');
+    
+    //check if both app_key and secret exist
+    if(($app_key == null) or ($secret == null) or $enable_feature == "0" || $enable_feature == NULL)
+      return;
+
+    if($this->_httpRequest == NULL)
+    {
+      include_once(_PS_MODULE_DIR_.'yotpo/httpRequest.php');
+      $this->_httpRequest = new YotpoHttpRequest($this->name);
+    }
+    $this->_httpRequest->makeMapRequest($params, $app_key, $secret, $this);
   }
 
   public function _getProductImageUrl($id_product)
@@ -90,6 +108,14 @@ class Yotpo extends Module
       return _PS_BASE_URL_._THEME_PROD_DIR_.$image->id_product.'-'.$image->id.'.'.'jpg';     
   }
 
+  public function getOrderDetails($id_order)
+  {
+    if(method_exists('OrderDetail', 'getList'))
+      return OrderDetail::getList($id_order);
+    else
+      return Db::getInstance()->executeS('SELECT * FROM `'._DB_PREFIX_.'order_detail` WHERE `id_order` = '.(int)$id_order);  
+  }
+
   public function uninstall()
   {
     if (!parent::uninstall() OR !Configuration::deleteByName($this->name.'_app_key') OR !Configuration::deleteByName($this->name.'_oauth_token') OR !Configuration::deleteByName($this->name.'_map_enabled'))
@@ -100,58 +126,108 @@ class Yotpo extends Module
 // module configuration
   public function getContent()
   {
-    if (Tools::isSubmit('submit'))
-    {
-      $this->_postValidation();
-      if (!sizeof($this->_postErrors))
-      {
-       $this->_postProcess();
-      }
-      else
-      {
-        foreach ($this->_postErrors AS $err)
-        {
-          $this->_html .= '<div class="alert error">'.$err.'</div>';
-        }
-      }
-    }
-    $this->_displaySettingsForm();
+    if (!function_exists('curl_init'))
+      return '<div class="error">'.$this->l('Yotpo needs the PHP Curl extension, please ask your hosting provider to enable it prior to use this module.').'</div>';
+    $this->_processRegistrationForm();
+    $this->_processSettingsForm();
+    $this->_displayForm();
     return $this->_html;
   }
 
-// module settings
-  private function _displaySettingsForm()
+
+  private function _processRegistrationForm()
   {
-  
+    if (Tools::isSubmit('yotpo_register'))
+    {
+      $email = Tools::getValue('yotpo_user_email');
+      $name = Tools::getValue('yotpo_user_name');
+      $password = Tools::getValue('yotpo_user_password');
+      $confirm = Tools::getValue('yotpo_user_confirm_password');
+      if ($email === false || $email === '')
+        return $this->_prepareError($this->l('Provide valid email address'));
+      if(strlen($password) < 6 || strlen($password) > 128)
+        return $this->_prepareError($this->l('Password must be at least 6 characters'));
+
+      if ($password != $confirm)
+        return $this->_prepareError($this->l('Passwords are not identical'));
+
+      if ($name === false || $name === '')
+        return $this->_prepareError($this->l('Name is missing'));
+
+      if($this->_httpRequest == NULL)
+      {
+        include_once(_PS_MODULE_DIR_.'yotpo/httpRequest.php');
+        $this->_httpRequest = new YotpoHttpRequest($this->name);
+      }
+      $response = $this->_httpRequest->register($email, $name, $password, _PS_BASE_URL_);      
+      if($response['status']['code'] == 200)
+      {
+        Configuration::updateValue('yotpo_app_key', $response['response']['app_key'], false);
+        Configuration::updateValue('yotpo_oauth_token', $response['response']['secret'], false);
+        $accountPlatformResponse = $this->_httpRequest->createAcountPlatform($response['response']['app_key'], $response['response']['secret'], _PS_BASE_URL_);        
+        if($response['status']['code'] == 200)
+          return $this->_prepareSuccess($this->l('Account successfully created'));  
+        else
+          return $this->_prepareError($response['status']['message']);  
+        
+      } 
+      else
+      {        
+        return $this->_prepareError($response['status']['message']);        
+      }   
+    }
+  }
+
+  private function _processSettingsForm()
+  {
+    if (Tools::isSubmit('yotpo_settings'))
+    {
+      
+      $api_key = Tools::getValue('yotpo_app_key');
+      $secret_token = Tools::getValue('yotpo_oauth_token');
+      $map_enabled = Tools::getValue('yotpo_map_enabled');
+      if($api_key == '')
+        return $this->_prepareError($this->l('Api key is missing'));
+      if($map_enabled && $secret_token == '')
+        return $this->_prepareError($this->l('Please fill out the secret token'));
+
+      $yotpo_map_enabled = Tools::getValue('yotpo_map_enabled') == false ? "0" : "1";
+      Configuration::updateValue('yotpo_map_enabled', $yotpo_map_enabled, false);
+      Configuration::updateValue('yotpo_app_key', Tools::getValue('yotpo_app_key'), false);
+      Configuration::updateValue('yotpo_oauth_token', Tools::getValue('yotpo_oauth_token'), false);
+      return $this->_prepareSuccess();
+    }
+  }
+
+  private function _displayForm()
+  {
+    return Configuration::get('yotpo_app_key') == '' ? $this->_displayRegistrationForm() : $this->_displaySettingsForm();
+  }
+
+  private function _displayRegistrationForm()
+  {
     global $smarty;
     $smarty->assign(array(
         'action' => Tools::safeOutput($_SERVER['REQUEST_URI']),
-        'appKey' => Tools::safeOutput(Tools::getValue('yotpo_app_key',Configuration::get($this->name.'_app_key'))),
-        'oauthToken' => Tools::safeOutput(Tools::getValue('yotpo_oauth_token',Configuration::get($this->name.'_oauth_token'))),
-        'mapEnabled' => Configuration::get($this->name.'_map_enabled') == "0" ? false : true));
-    $this->_html .= $this->display(__FILE__, 'settingsForm.tpl');
+        'email' => Tools::safeOutput(Tools::getValue('yotpo_user_email')),
+        'password' => Tools::safeOutput(Tools::getValue('yotpo_user_password')),
+        'confirmPassword' => Tools::safeOutput(Tools::getValue('yotpo_user_confirm_password')),
+        'userName' => Tools::safeOutput(Tools::getValue('yotpo_user_name'))));
+
+    $this->_html .= $this->display(__FILE__, 'tpl/registrationForm.tpl');
+    return $this->_html;
   }
 
-  private function _postValidation()
+  private function _displaySettingsForm()
   {
-    $api_key = Tools::getValue('yotpo_app_key');
-    $secret_token = Tools::getValue('yotpo_oauth_token');
-    $map_enabled = Tools::getValue('yotpo_map_enabled');
-    if($api_key == '')
-      $this->_postErrors[] = $this->l('Please fill out the api key');
-    if($map_enabled && $secret_token == '')
-      $this->_postErrors[] = $this->l('Please fill out the secret token');      
-  }
-
-  private function _postProcess()
-  {
-    $yotpo_map_enabled = Tools::getValue('yotpo_map_enabled') == false ? "0" : "1";
-
-    Configuration::updateValue($this->name.'_map_enabled', $yotpo_map_enabled, false);
-    Configuration::updateValue($this->name.'_app_key', Tools::getValue('yotpo_app_key'), false);
-    Configuration::updateValue($this->name.'_oauth_token', Tools::getValue('yotpo_oauth_token'), false);
-
-    $this->_html .= '<div class="conf confirm">'.$this->l('Settings updated').'</div>';
+    global $smarty;
+    $smarty->assign(array(
+        'action' => Tools::safeOutput($_SERVER['REQUEST_URI']),
+        'appKey' => Tools::safeOutput(Tools::getValue('yotpo_app_key',Configuration::get('yotpo_app_key'))),
+        'oauthToken' => Tools::safeOutput(Tools::getValue('yotpo_oauth_token',Configuration::get('yotpo_oauth_token'))),
+        'mapEnabled' => Configuration::get('yotpo_map_enabled') == "0" ? false : true));
+    
+    $this->_html .= $this->display(__FILE__, 'tpl/settingsForm.tpl');
   }
 
   private function _getProductModel($product)
@@ -193,6 +269,15 @@ class Yotpo extends Module
    return $result;
   }
 
+  private function _prepareError($message = '')
+  {
+    $this->_html .= sprintf('<div class="conf error">%s</div>', $message == '' ? $this->l('Error occured') : $message);
+  }
+
+  protected function _prepareSuccess($message = '')
+  {
+    $this->_html .= sprintf('<div class="conf confirm">%s</div>', $message == '' ? $this->l('Settings updated') : $message);
+  }
     /**
      * Logs messages/variables/data to browser console from within php
      *
