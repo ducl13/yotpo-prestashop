@@ -16,4 +16,5 @@
         </div>
         <input type="submit" name="yotpo_settings" value="{l s='Update' mod='yotpo'}" class="button" />
       </fieldset>
+      <a href="https://api.yotpo.com/users/sign_in" target="_blank"><input type="button"  value="Get cradentials" /></a>
     </form>

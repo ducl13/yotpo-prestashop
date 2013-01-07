@@ -18,5 +18,6 @@
           <input type="password" name="yotpo_user_confirm_password" value="{$confirmPassword}"/>
         </div>
         <input type="submit" name="yotpo_register" value="{l s='Register' mod='yotpo'}" class="button" />
+        <a><input type="submit" name="log_in_button" value="Allready registered?" /></a>
       </fieldset>
     </form>

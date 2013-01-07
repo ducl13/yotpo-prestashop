@@ -201,6 +201,10 @@ class Yotpo extends Module
 
   private function _displayForm()
   {
+    if (Tools::isSubmit('log_in_button'))
+    {
+      return $this->_displaySettingsForm();
+    }
     return Configuration::get('yotpo_app_key') == '' ? $this->_displayRegistrationForm() : $this->_displaySettingsForm();
   }
 
