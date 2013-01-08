@@ -14,11 +14,11 @@ class Yotpo extends Module
       $version_test = $version_mask[0] > 0 && $version_mask[1] > 4;
 
       $this->name = 'Yotpo';
-      $this->tab = $version_test ? 'advertising_marketing' : 'Yotpo';
-      $this->version = 1.0;
+      $this->tab = $version_test ? 'advertising_marketing' : 'Reviews';
+      $this->version = '1.0';
       if($version_test)
         $this->author = 'Yotpo';
-      $this->need_instance = 0;
+      $this->need_instance = 1;
  
       parent::__construct();
    
@@ -26,16 +26,14 @@ class Yotpo extends Module
       $this->description = $this->l('Allow MAP');
 
       include_once(_PS_MODULE_DIR_.'yotpo/httpClient.php');
+      if(!Configuration::get('yotpo_app_key'))
+        $this->warning = $this->l('Set your api key in order to use this module correctly');
       $this->_httpClient = new YotpoHttpClient($this->name);
     }
  
   public function install()
   {
-    if(!Configuration::get('yotpo_map_enabled'))
-    {
-      Configuration::updateValue('yotpo_map_enabled', '1', false);
-    }
-    
+  
     $is_curl_installed = true;
     if (!function_exists('curl_init'))
     {
@@ -46,7 +44,7 @@ class Yotpo extends Module
     if (!$is_curl_installed || parent::install() == false OR !$this->registerHook('productfooter') 
                                                           OR !$this->registerHook('paymentConfirm')) {
       return false;  
-    }  
+    }
     return true;
   }
 
@@ -132,6 +130,12 @@ class Yotpo extends Module
     if (!function_exists('curl_init'))
       return '<div class="error">'.$this->l('Yotpo needs the PHP Curl extension, please ask your hosting provider to enable it prior to use this module.').'</div>';
 
+    $smarty->assign('firstInstalled', false);
+    if(!Configuration::get('yotpo_map_enabled'))
+    {
+      Configuration::updateValue('yotpo_map_enabled', '1', false);
+      $smarty->assign('firstInstalled', true);
+    }
 
     if(isset($this->context) && isset($this->context->controller) && method_exists($this->context->controller, 'addCSS'))
       $this->context->controller->addCSS($this->_path.'/css/form.css', 'all');
@@ -295,58 +299,5 @@ class Yotpo extends Module
   {
     $this->_html .= sprintf('<div class="conf confirm">%s</div>', $message == '' ? $this->l('Settings updated') : $message);
   }
-    /**
-     * Logs messages/variables/data to browser console from within php
-     *
-     * @param $name: message to be shown for optional data/vars
-     * @param $data: variable (scalar/mixed) arrays/objects, etc to be logged
-     * @param $jsEval: whether to apply JS eval() to arrays/objects
-     *
-     * @return none
-     * @author Sarfraz
-     */
-     function logConsole($name, $data = NULL, $jsEval = FALSE)
-     {
-          if (! $name) return false;
-
-          $isevaled = false;
-          $type = ($data || gettype($data)) ? 'Type: ' . gettype($data) : '';
-
-          if ($jsEval && (is_array($data) || is_object($data)))
-          {
-               $data = 'eval(' . preg_replace('#[\s\r\n\t\0\x0B]+#', '', json_encode($data)) . ')';
-               $isevaled = true;
-          }
-          else
-          {
-               $data = json_encode($data);
-          }
-
-          # sanitalize
-          $data = $data ? $data : '';
-          $search_array = array("#'#", '#""#', "#''#", "#\n#", "#\r\n#");
-          $replace_array = array('"', '', '', '\\n', '\\n');
-          $data = preg_replace($search_array,  $replace_array, $data);
-          $data = ltrim(rtrim($data, '"'), '"');
-          $data = $isevaled ? $data : ($data[0] === "'") ? $data : "'" . $data . "'";
-
-$js = <<<JSCODE
-\n<script>
-     // fallback - to deal with IE (or browsers that don't have console)
-     if (! window.console) console = {};
-     console.log = console.log || function(name, data){};
-     // end of fallback
-
-     console.log('$name');
-     console.log('------------------------------------------');
-     console.log('$type');
-     console.log($data);
-     console.log('\\n');
-</script>
-JSCODE;
-
-          echo $js;
-     } # end logConsole
-
 }
 ?>

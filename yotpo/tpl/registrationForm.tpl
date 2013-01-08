@@ -51,3 +51,27 @@
     </form>
   </div>
 </div>
+
+{if $firstInstalled}
+<script type="text/javascript">
+    var prefix ='';
+    if (typeof _gaq != "object") {
+      window["_gaq"] = [];
+      _gaq.push(["_setAccount", "UA-25706646-2"]);
+      // _gaq.push([prefix + '_trackPageview']);
+      (function() {
+        var ga = document.createElement("script");
+        ga.type = "text/javascript";
+        ga.async = true;
+        ga.src = ("https:" == document.location.protocol ? "https://ssl" : "http://www") + ".google-analytics.com/ga.js";
+        var s = document.getElementsByTagName("script")[0];
+        s.parentNode.insertBefore(ga, s);
+      })();
+    } else {
+      prefix = 't2.';
+      _gaq.push([prefix + "_setAccount", "UA-25706646-2"]);
+      // _gaq.push([prefix + "_trackPageview"]);
+    }
+    _gaq.push([prefix + "_trackEvent", "prestashop", "install"]);
+</script>
+{/if}
