@@ -119,9 +119,10 @@ class Yotpo extends Module
 
   public function uninstall()
   {
-    if (!parent::uninstall() OR !Configuration::deleteByName('yotpo_app_key') OR !Configuration::deleteByName('yotpo_oauth_token') OR !Configuration::deleteByName('yotpo_map_enabled'))
-      Db::getInstance()->Execute('DELETE FROM `'._DB_PREFIX_.'yotpo`');
-    parent::uninstall();
+    Configuration::deleteByName('yotpo_app_key');
+    Configuration::deleteByName('yotpo_oauth_token');
+    Configuration::deleteByName('yotpo_map_enabled');
+    return parent::uninstall();
   }
 
 // module configuration
@@ -184,23 +185,36 @@ class Yotpo extends Module
 
       if ($name === false || $name === '')
         return $this->_prepareError($this->l('Name is missing'));
+      $is_mail_valid = $this->_httpClient->checkeMailAvailability($email);
 
-      $response = $this->_httpClient->register($email, $name, $password, _PS_BASE_URL_);      
-      if($response['status']['code'] == 200)
+      if($is_mail_valid['status']['code'] == 200 && $is_mail_valid['response']['available'] == true)
       {
-        Configuration::updateValue('yotpo_app_key', $response['response']['app_key'], false);
-        Configuration::updateValue('yotpo_oauth_token', $response['response']['secret'], false);
-        $accountPlatformResponse = $this->_httpClient->createAcountPlatform($response['response']['app_key'], $response['response']['secret'], _PS_BASE_URL_);        
+        $response = $this->_httpClient->register($email, $name, $password, _PS_BASE_URL_);      
         if($response['status']['code'] == 200)
-          return $this->_prepareSuccess($this->l('Account successfully created'));  
+        {
+          $accountPlatformResponse = $this->_httpClient->createAcountPlatform($response['response']['app_key'], $response['response']['secret'], _PS_BASE_URL_);        
+          if($accountPlatformResponse['status']['code'] == 200)
+          {
+            Configuration::updateValue('yotpo_app_key', $response['response']['app_key'], false);
+            Configuration::updateValue('yotpo_oauth_token', $response['response']['secret'], false);
+            return $this->_prepareSuccess($this->l('Account successfully created'));  
+          }
+          else
+            return $this->_prepareError($response['status']['message']);  
+          
+        } 
         else
-          return $this->_prepareError($response['status']['message']);  
-        
-      } 
+        {        
+          return $this->_prepareError($response['status']['message']);        
+        } 
+      }
       else
-      {        
-        return $this->_prepareError($response['status']['message']);        
-      }   
+      {
+        if($is_mail_valid['status']['code'] == 200 )
+          return $this->_prepareError('This mail is allready taken.');
+        else
+          return $this->_prepareError();
+      }  
     }
   }
 
@@ -249,8 +263,6 @@ class Yotpo extends Module
     $smarty->assign(array(
         'action' => Tools::safeOutput($_SERVER['REQUEST_URI']),
         'email' => Tools::safeOutput(Tools::getValue('yotpo_user_email')),
-        'password' => Tools::safeOutput(Tools::getValue('yotpo_user_password')),
-        'confirmPassword' => Tools::safeOutput(Tools::getValue('yotpo_user_confirm_password')),
         'userName' => Tools::safeOutput(Tools::getValue('yotpo_user_name'))));
 
     $this->_html .= $this->display(__FILE__, 'tpl/registrationForm.tpl');
@@ -310,7 +322,7 @@ class Yotpo extends Module
 
   private function _prepareError($message = '')
   {
-    $this->_html .= sprintf('<div class="conf error">%s</div>', $message == '' ? $this->l('Error occured') : $message);
+    $this->_html .= sprintf('<div class="alert">%s</div>', $message == '' ? $this->l('Error occured') : $message);
   }
 
   protected function _prepareSuccess($message = '')

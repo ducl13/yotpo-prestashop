@@ -33,11 +33,11 @@
         </div>
         <div class="y-label">{l s='Password' mod='yotpo'}</div>
         <div class="y-input">
-          <input type="password" name="yotpo_user_password" value="{$password}"/>
+          <input type="password" name="yotpo_user_password"/>
         </div>
         <div class="y-label">{l s='Confirm password' mod='yotpo'}</div>
         <div class="y-input">
-          <input type="password" name="yotpo_user_confirm_password" value="{$confirmPassword}"/>
+          <input type="password" name="yotpo_user_confirm_password"/>
         </div>
       </fieldset>
       <div class="y-footer">

@@ -2,7 +2,7 @@
 class YotpoHttpClient 
 {
 	const YOTPO_API_URL = "https://api.yotpo.com";
-	const HTTP_REQUEST_TIMEOUT = 300;
+	const HTTP_REQUEST_TIMEOUT = 30;
   	const YOTPO_OAUTH_TOKEN_URL = "https://api.yotpo.com/oauth/token";
 
 
@@ -10,6 +10,17 @@ class YotpoHttpClient
   	{
     	$this->name = $name;
   	}
+
+  	public function checkeMailAvailability($email)
+  	{
+  		$data = array();
+  		$data['model'] = 'user';
+  		$data['field'] = 'email';
+  		$data['value'] = $email;
+
+  		return $this->makePostRequest(self::YOTPO_API_URL . '/apps/check_availability', $data);
+  	}
+
 	public function register($email, $name, $password, $url)
 	{
 
