@@ -129,7 +129,7 @@ class Yotpo extends Module
   {
     if (!function_exists('curl_init'))
       return '<div class="error">'.$this->l('Yotpo needs the PHP Curl extension, please ask your hosting provider to enable it prior to use this module.').'</div>';
-
+    global $smarty;
     $smarty->assign('firstInstalled', false);
     if(!Configuration::get('yotpo_map_enabled'))
     {
