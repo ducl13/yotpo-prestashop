@@ -129,12 +129,30 @@ class Yotpo extends Module
   {
     if (!function_exists('curl_init'))
       return '<div class="error">'.$this->l('Yotpo needs the PHP Curl extension, please ask your hosting provider to enable it prior to use this module.').'</div>';
-    global $smarty;
-    $smarty->assign('firstInstalled', false);
+    
     if(!Configuration::get('yotpo_map_enabled'))
     {
       Configuration::updateValue('yotpo_map_enabled', '1', false);
-      $smarty->assign('firstInstalled', true);
+      echo ' 
+        <script type="text/javascript">
+        var prefix ="";
+        if (typeof _gaq != "object") {
+          window["_gaq"] = [];
+          _gaq.push(["_setAccount", "UA-25706646-2"]);
+          (function() {
+            var ga = document.createElement("script");
+            ga.type = "text/javascript";
+            ga.async = true;
+            ga.src = ("https:" == document.location.protocol ? "https://ssl" : "http://www") + ".google-analytics.com/ga.js";
+            var s = document.getElementsByTagName("script")[0];
+            s.parentNode.insertBefore(ga, s);
+          })();
+        } else {
+          prefix = "t2.";
+          _gaq.push([prefix + "_setAccount", "UA-25706646-2"]);
+        }
+        _gaq.push([prefix + "_trackEvent", "prestashop", "install"]);
+        </script>';
     }
 
     if(isset($this->context) && isset($this->context->controller) && method_exists($this->context->controller, 'addCSS'))
