@@ -44,7 +44,7 @@ class Yotpo extends Module
         $this->_errors[] = $this->l('Yotpo needs the PHP Curl extension, please ask your hosting provider to enable it prior to install this module.');
     }
     if (!$is_curl_installed || parent::install() == false OR !$this->registerHook('productfooter') 
-                                   OR !$this->registerHook('paymentConfirm')) {
+                                                          OR !$this->registerHook('paymentConfirm')) {
       return false;  
     }  
     return true;
@@ -132,7 +132,11 @@ class Yotpo extends Module
     if (!function_exists('curl_init'))
       return '<div class="error">'.$this->l('Yotpo needs the PHP Curl extension, please ask your hosting provider to enable it prior to use this module.').'</div>';
 
-    $this->context->controller->addCSS($this->_path.'/css/form.css', 'all');
+
+    if(isset($this->context) && isset($this->context->controller) && method_exists($this->context->controller, 'addCSS'))
+      $this->context->controller->addCSS($this->_path.'/css/form.css', 'all');
+    else
+      echo '<link rel="stylesheet" type="text/css" href="../modules/yotpo/css/form.css" />'; 
     $this->_processRegistrationForm();
     $this->_processSettingsForm();
     $this->_displayForm();
