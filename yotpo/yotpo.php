@@ -23,7 +23,7 @@ class Yotpo extends Module
       parent::__construct();
    
       $this->displayName = $this->l('Yotpo');
-      $this->description = $this->l('Allow MAP');
+      $this->description = $this->l('The #1 reviews add-on for SMBs. Generate beautiful, trusted reviews for your shop.');
 
       include_once(_PS_MODULE_DIR_.'yotpo/httpClient.php');
       if(!Configuration::get('yotpo_app_key'))
