@@ -2,11 +2,11 @@
     <form action="{$action}" method="post">
       <div class="y-page-header">
         <i class="y-logo"></i>Settings</div>
-           {if !$finishedRegistration && !$allreadyUsingYotpo}<div class="y-settings-title">To customize the look and feel of the widget, and to edit your Mail After Purchase settings, just head to the <a href="https://api.yotpo.com/users/sign_in" target="_blank">Yotpo Dashboard.</a></div> {/if}
-   {if $allreadyUsingYotpo}<div class="y-settings-title">To get your api key and secret token  <a href="https://api.yotpo.com/users/sign_in" target="_blank">log in here.</a></div> {/if}
+           {if !$finishedRegistration && !$allreadyUsingYotpo}<div class="y-settings-title">To customize the look and feel of the widget, and to edit your Mail After Purchase settings, just head to the <a class="y-href" href="https://api.yotpo.com/users/sign_in" target="_blank">Yotpo Dashboard.</a></div> {/if}
+   {if $allreadyUsingYotpo}<div class="y-settings-title">To get your api key and secret token  <a class="y-href" href="https://api.yotpo.com/users/sign_in" target="_blank">log in here.</a></div> {/if}
 
       {if $finishedRegistration}<div class="y-settings-title">All set! The Yotpo widget is now properly installed on your shop. </br>
-    To customize the look and feel of the widget, and to edit your Mail After Purchase settings, just head to the <a href="https://api.yotpo.com/users/sign_in" target="_blank">Yotpo Dashboard.</a><//div>{/if}
+    To customize the look and feel of the widget, and to edit your Mail After Purchase settings, just head to the <a class="y-href" href="https://api.yotpo.com/users/sign_in" target="_blank">Yotpo Dashboard.</a><//div>{/if}
 
       <fieldset id="y-fieldset">
         <div class="y-label">{l s='App key' mod='yotpo'}</div>

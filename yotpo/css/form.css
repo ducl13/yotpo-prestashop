@@ -52,7 +52,7 @@
 	float: right;
 }
 .y-already-logged-in {
-	color: black;
+	color: #3293D6;
 	margin: 0;
 	padding: 0;
 	background: none;
@@ -100,6 +100,9 @@
 }
 .y-input input {
 	width: 100%;
+}
+.y-href{
+	color: #3293D6
 }
 .y-submit-btn {
 	margin-left: 5px;
