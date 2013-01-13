@@ -109,6 +109,16 @@ class Yotpo extends Module
       return _PS_BASE_URL_._THEME_PROD_DIR_.$image->id_product.'-'.$image->id.'.'.'jpg';     
   }
 
+  public function getCurrency($id_order)
+  {
+        $id_currency = (int)Db::getInstance()->getValue('
+        SELECT id_currency
+        FROM '._DB_PREFIX_.'orders
+        WHERE id_order = '.(int)$id_order);        
+        return Currency::getCurrency($id_currency);
+        
+  }
+  
   public function getOrderDetails($id_order)
   {
     if(method_exists('OrderDetail', 'getList'))

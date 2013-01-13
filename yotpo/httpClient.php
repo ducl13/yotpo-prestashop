@@ -76,6 +76,9 @@ class YotpoHttpClient
 		    $products = $context->getOrderDetails($params['id_order']);
 		    $products_arr = array();
 
+   		    $currency = $context->getCurrency($params['id_order']);
+		    $data["currency_iso"] = $currency['iso_code'];
+
 		    foreach ($products as $product) {
 
 		      $product_data = array();
@@ -85,6 +88,11 @@ class YotpoHttpClient
 		      $product_data['name'] = $full_product->name;
 		      $product_data['image'] = $context->_getProductImageUrl($product['product_id']);
 		      $product_data['description'] = strip_tags($full_product->description);
+
+		      if (isset($product['total_price_tax_excl']))
+		     	$product_data['price'] = $product['total_price_tax_excl'];
+		      else
+	 			$product_data['price'] = $product['product_price'];
 
 		      $products_arr[$product['product_id']] = $product_data;
 		    }
