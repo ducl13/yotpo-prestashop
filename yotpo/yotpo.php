@@ -42,7 +42,7 @@ class Yotpo extends Module
         $this->_errors[] = $this->l('Yotpo needs the PHP Curl extension, please ask your hosting provider to enable it prior to install this module.');
     }
     if (!$is_curl_installed || parent::install() == false OR !$this->registerHook('productfooter') 
-                                                          OR !$this->registerHook('paymentConfirm')) {
+                                                          OR !$this->registerHook('postUpdateOrderStatus')) {
       return false;  
     }
     return true;
@@ -67,24 +67,28 @@ class Yotpo extends Module
     return $this->display(__FILE__,'tpl/widgetDiv.tpl');
   }
 
+  public function hookpostUpdateOrderStatus($params)
+  { 
+    $accepted_status = array(defined('PS_OS_WS_PAYMENT') ? (int)Configuration::get(PS_OS_WS_PAYMENT) : _PS_OS_WS_PAYMENT_,
+                             defined('PS_OS_PAYMENT') ? (int)Configuration::get(PS_OS_PAYMENT) : _PS_OS_PAYMENT_,
+                             defined('PS_OS_DELIVERED') ? (int)Configuration::get(PS_OS_DELIVERED) : _PS_OS_DELIVERED_,
+                             defined('PS_OS_SHIPPING') ? (int)Configuration::get(PS_OS_SHIPPING) : _PS_OS_SHIPPING_);
+    if(in_array($params['newOrderStatus']->id, $accepted_status))
+    {
+      $app_key = Configuration::get('yotpo_app_key');
+      $secret = Configuration::get('yotpo_oauth_token');
+      $enable_feature = Configuration::get('yotpo_map_enabled');   
+
+      if((isset($app_key)) AND (isset($secret)) AND $enable_feature == "1")
+        $this->_httpClient->makeMapRequest($params, $app_key, $secret, $this);
+    }
+  }
+  
   private function _getShopDomain()
   {
     if(method_exists('Tools', 'getShopDomain'))
       return Tools::getShopDomain(false,false);
     return str_replace('www.', '', $_SERVER['HTTP_HOST']);;
-  }
-
-  public function hookpaymentConfirm($params)
-  {
-    $app_key = Configuration::get('yotpo_app_key');
-    $secret = Configuration::get('yotpo_oauth_token');
-    $enable_feature = Configuration::get('yotpo_map_enabled');
-    
-    //check if both app_key and secret exist
-    if(($app_key == null) or ($secret == null) or $enable_feature == "0" || $enable_feature == NULL)
-      return;
-
-    $this->_httpClient->makeMapRequest($params, $app_key, $secret, $this);
   }
 
   public function _getProductImageUrl($id_product)
@@ -141,7 +145,7 @@ class Yotpo extends Module
     if (!function_exists('curl_init'))
       return '<div class="error">'.$this->l('Yotpo needs the PHP Curl extension, please ask your hosting provider to enable it prior to use this module.').'</div>';
     
-    if(!Configuration::get('yotpo_map_enabled'))
+    if(Configuration::get('yotpo_map_enabled') == NULL)
     {
       Configuration::updateValue('yotpo_map_enabled', '1', false);
       echo ' 
