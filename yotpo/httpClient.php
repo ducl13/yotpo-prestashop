@@ -58,16 +58,14 @@ class YotpoHttpClient
 		
 		if(isset($token))
 		{
+			
 			$data = array();
 			$data['utoken'] = $token;
 		    $customer = NULL;
-		    if(isset($params['cart']))
-		      $customer = new Customer((int)$params['cart']->id_customer);
-		    else
-		    {
-		      $order = new Order((int)$params['id_order']);
-		      $customer = new Customer((int)$order->id_customer);
-		    }
+
+	        $order = new Order((int)$params['id_order']);
+	        $customer = new Customer((int)$order->id_customer);
+		    $data["order_date"] = $order->date_add;
 		    $data["email"] = $customer->email;
 		    $data["customer_name"] = $customer->firstname . ' ' . $customer->lastname;
 		    $data["order_id"] = $params['id_order'];
