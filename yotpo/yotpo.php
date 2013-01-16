@@ -15,14 +15,14 @@ class Yotpo extends Module
 
       $this->name = 'yotpo';
       $this->tab = $version_test ? 'advertising_marketing' : 'Reviews';
-      $this->version = '1.0.1';
+      $this->version = '1.0.2';
       if($version_test)
         $this->author = 'Yotpo';
       $this->need_instance = 1;
  
       parent::__construct();
    
-      $this->displayName = $this->l('Yotpo');
+      $this->displayName = $this->l('* Yotpo *');
       $this->description = $this->l('The #1 reviews add-on for SMBs. Generate beautiful, trusted reviews for your shop.');
 
       include_once(_PS_MODULE_DIR_.'yotpo/httpClient.php');
