@@ -41,7 +41,7 @@
 }
 .y-logo {
 	display: block;
-	background: url("http://www.yotpo.com/assets/spriteSheet.png")	-14px -10px;
+	background: url("../img/spriteSheet.png")	-14px -10px;
 	width: 40px;
 	height: 32px;
 	float: left;
@@ -64,7 +64,7 @@
 	line-height: 20px;
 	font-weight: lighter;
 	margin-bottom: 15px;
-	background: url("http://www.yotpo.com/assets/line.png") repeat-x bottom;
+	background: url("../img/line.png") repeat-x bottom;
 }
 .y-features-list {
 	font-weight: bold;
@@ -162,26 +162,26 @@
     width: 28px;
 }
 .conversation-rate {
-    background: url("http://www.yotpo.com/assets/spriteSheet.png") no-repeat  -189px -48px;
+    background: url("../img/spriteSheet.png") no-repeat  -189px -48px;
 }
 .multi-languages {
-    background: url("http://www.yotpo.com/assets/spriteSheet.png") no-repeat  -189px -83px;
+    background: url("../img/spriteSheet.png") no-repeat  -189px -83px;
 }
 .forever-free {
-    background: url("http://www.yotpo.com/assets/spriteSheet.png") no-repeat  -189px -119px;
+    background: url("../img/spriteSheet.png") no-repeat  -189px -119px;
 }
 .social-engagement {
-    background: url("http://www.yotpo.com/assets/spriteSheet.png") no-repeat  -189px -188px;
+    background: url("../img/spriteSheet.png") no-repeat  -189px -188px;
 }
 .plug-play {
-    background: url("http://www.yotpo.com/assets/spriteSheet.png") no-repeat  -189px -222px;
+    background: url("../img/spriteSheet.png") no-repeat  -189px -222px;
 }
 .full-customization {
-    background: url("http://www.yotpo.com/assets/spriteSheet.png") no-repeat  -189px -259px;
+    background: url("../img/spriteSheet.png") no-repeat  -189px -259px;
 }
 .analytics {
-    background: url("http://www.yotpo.com/assets/spriteSheet.png") no-repeat  -189px -154px;
+    background: url("../img/spriteSheet.png") no-repeat  -189px -154px;
 }
 .seo {
-    background: url("http://www.yotpo.com/assets/spriteSheet.png") no-repeat  -189px -293px;
+    background: url("../img/spriteSheet.png") no-repeat  -189px -293px;
 }
