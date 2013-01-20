@@ -15,7 +15,7 @@ class Yotpo extends Module
 
       $this->name = 'yotpo';
       $this->tab = $version_test ? 'advertising_marketing' : 'Reviews';
-      $this->version = '1.0.2';
+      $this->version = '1.0.3';
       if($version_test)
         $this->author = 'Yotpo';
       $this->need_instance = 1;
@@ -45,6 +45,8 @@ class Yotpo extends Module
                                                           OR !$this->registerHook('postUpdateOrderStatus')) {
       return false;  
     }
+    // Set default language to english.
+    Configuration::updateValue('yotpo_language', 'en', false);
     return true;
   }
 
@@ -61,6 +63,7 @@ class Yotpo extends Module
     $smarty->assign('yotpoProductModel', $this->_getProductModel($product));
     $smarty->assign('yotpoProductImageUrl', $this->_getProductImageUrl($product->id));
     $smarty->assign('yotpoProductBreadCrumbs', $this->_getBreadCrumbs($product));
+    $smarty->assign('yotpoLanguage', Configuration::get('yotpo_language'));
 
     // TODO check if can insert this in header part so it will be loaded only once
     echo "<script src ='http://www.yotpo.com/js/yQuery.js'></script>";
@@ -136,6 +139,7 @@ class Yotpo extends Module
     Configuration::deleteByName('yotpo_app_key');
     Configuration::deleteByName('yotpo_oauth_token');
     Configuration::deleteByName('yotpo_map_enabled');
+    Configuration::deleteByName('yotpo_language');
     return parent::uninstall();
   }
 
@@ -240,6 +244,7 @@ class Yotpo extends Module
       $api_key = Tools::getValue('yotpo_app_key');
       $secret_token = Tools::getValue('yotpo_oauth_token');
       $map_enabled = Tools::getValue('yotpo_map_enabled');
+      $language = Tools::getValue('yotpo_language');
       if($api_key == '')
         return $this->_prepareError($this->l('Api key is missing'));
       if($map_enabled && $secret_token == '')
@@ -249,6 +254,7 @@ class Yotpo extends Module
       Configuration::updateValue('yotpo_map_enabled', $yotpo_map_enabled, false);
       Configuration::updateValue('yotpo_app_key', Tools::getValue('yotpo_app_key'), false);
       Configuration::updateValue('yotpo_oauth_token', Tools::getValue('yotpo_oauth_token'), false);
+      Configuration::updateValue('yotpo_language', $language, false);
       return $this->_prepareSuccess();
     }
   }
@@ -290,7 +296,8 @@ class Yotpo extends Module
         'action' => Tools::safeOutput($_SERVER['REQUEST_URI']),
         'appKey' => Tools::safeOutput(Tools::getValue('yotpo_app_key',Configuration::get('yotpo_app_key'))),
         'oauthToken' => Tools::safeOutput(Tools::getValue('yotpo_oauth_token',Configuration::get('yotpo_oauth_token'))),
-        'mapEnabled' => Configuration::get('yotpo_map_enabled') == "0" ? false : true));
+        'mapEnabled' => Configuration::get('yotpo_map_enabled') == "0" ? false : true,
+        'widgetLanguage' => Configuration::get('yotpo_language')));
     
     $this->_html .= $this->display(__FILE__, 'tpl/settingsForm.tpl');
   }

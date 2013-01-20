@@ -1,4 +1,3 @@
-<div id="yotpo_block_left" class="block">
 
   <div class="yotpo reviews" 
   	   data-appkey="{$yotpoAppkey}"
@@ -9,6 +8,6 @@
   	   data-url="{$link->getProductLink($smarty.get.id_product, $smarty.get.id_product.link_rewrite)|escape:'htmlall':'UTF-8'}" 
   	   data-image-url="{$yotpoProductImageUrl}" 
   	   data-description="{$yotpoProductDescription}" 
-  	   data-bread-crumbs="{$yotpoProductBreadCrumbs}"> 
+  	   data-bread-crumbs="{$yotpoProductBreadCrumbs}"
+       data-lang="{$yotpoLanguage}"> 
   </div>
-</div>

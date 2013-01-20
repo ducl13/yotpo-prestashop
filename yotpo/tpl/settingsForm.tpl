@@ -23,6 +23,24 @@
     {/if}
 
       <fieldset id="y-fieldset">
+        
+        <div class="y-label">{l s='Select widget language' mod='yotpo'}
+          <select name="yotpo_language">
+            <option value="en" {if $widgetLanguage == "en"}selected{/if}>English</option>
+            <option value="de" {if $widgetLanguage == "de"}selected{/if}>German</option>
+            <option value="es" {if $widgetLanguage == "es"}selected{/if}>Spanish</option>
+            <option value="fr" {if $widgetLanguage == "fr"}selected{/if}>French</option>
+            <option value="he" {if $widgetLanguage == "he"}selected{/if}>Hebrew</option>
+            <option value="hr" {if $widgetLanguage == "hr"}selected{/if}>Croatian</option>
+            <option value="it" {if $widgetLanguage == "it"}selected{/if}>Italian</option>
+            <option value="ja" {if $widgetLanguage == "ja"}selected{/if}>Japanese</option>
+            <option value="nl" {if $widgetLanguage == "nl"}selected{/if}>Dutch</option>
+            <option value="pt" {if $widgetLanguage == "pt"}selected{/if}>Portuguese</option>
+            <option value="sv" {if $widgetLanguage == "sv"}selected{/if}>Swedish</option>
+            <option value="vi" {if $widgetLanguage == "vi"}selected{/if}>Vietnamese</option>
+          </select>
+        </div>
+
         <div class="y-label">{l s='App key' mod='yotpo'}</div>
         <div class="y-input">
           <input type="text" name="yotpo_app_key" value="{$appKey}"/>
