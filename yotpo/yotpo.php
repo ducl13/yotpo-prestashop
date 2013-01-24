@@ -15,14 +15,14 @@ class Yotpo extends Module
 
       $this->name = 'yotpo';
       $this->tab = $version_test ? 'advertising_marketing' : 'Reviews';
-      $this->version = '1.0.3';
+      $this->version = '1.0.4';
       if($version_test)
         $this->author = 'Yotpo';
       $this->need_instance = 1;
  
       parent::__construct();
    
-      $this->displayName = $this->l('* Yotpo *');
+      $this->displayName = $this->l('Yotpo');
       $this->description = $this->l('The #1 reviews add-on for SMBs. Generate beautiful, trusted reviews for your shop.');
 
       include_once(_PS_MODULE_DIR_.'yotpo/httpClient.php');
@@ -42,32 +42,29 @@ class Yotpo extends Module
         $this->_errors[] = $this->l('Yotpo needs the PHP Curl extension, please ask your hosting provider to enable it prior to install this module.');
     }
     if (!$is_curl_installed || parent::install() == false OR !$this->registerHook('productfooter') 
-                                                          OR !$this->registerHook('postUpdateOrderStatus')) {
+                                                          OR !$this->registerHook('postUpdateOrderStatus')
+                                                          OR !$this->registerHook('displayProductTab')
+                                                          OR !$this->registerHook('displayProductTabContent')) {
       return false;  
     }
     // Set default language to english.
     Configuration::updateValue('yotpo_language', 'en', false);
+
+    // Set default widget location to product page footer.
+    Configuration::updateValue('yotpo_widget_location', 'footer', false);
+
+    // Set default widget tab name.
+    Configuration::updateValue('yotpo_widget_tab_name', 'Reviews', false);    
     return true;
   }
 
   public function hookproductfooter($params)
   {
-
-    global $smarty;
-    $product = $params['product'];
-    $smarty->assign('yotpoAppkey', Configuration::get('yotpo_app_key'));
-    $smarty->assign('yotpoProductId', $product->id);
-    $smarty->assign('yotpoProductName', strip_tags($product->name));
-    $smarty->assign('yotpoProductDescription', strip_tags($product->description));
-    $smarty->assign('yotpoDomain', $this->_getShopDomain());
-    $smarty->assign('yotpoProductModel', $this->_getProductModel($product));
-    $smarty->assign('yotpoProductImageUrl', $this->_getProductImageUrl($product->id));
-    $smarty->assign('yotpoProductBreadCrumbs', $this->_getBreadCrumbs($product));
-    $smarty->assign('yotpoLanguage', Configuration::get('yotpo_language'));
-
-    // TODO check if can insert this in header part so it will be loaded only once
-    echo "<script src ='http://www.yotpo.com/js/yQuery.js'></script>";
-    return $this->display(__FILE__,'tpl/widgetDiv.tpl');
+    if (!$this->isWidgetInTab())
+    {
+      return $this->showWidget($params['product']);  
+    }
+    return NULL;
   }
 
   public function hookpostUpdateOrderStatus($params)
@@ -87,6 +84,57 @@ class Yotpo extends Module
     }
   }
   
+  public function hookProductTab($params)
+  { 
+    $product_id = $this->checkIfProductPage();
+    if($product_id != NULL && $this->isWidgetInTab())
+    {
+      return "<li><a href='#idTab-yotpo'> Reviews </a></li>"; 
+    }
+    return NULL;
+  }
+
+  public function hookProductTabContent($params)
+  {
+    $product_id = $this->checkIfProductPage();
+    if($product_id != NULL && $this->isWidgetInTab())
+    {
+      return "<div id='idTab-yotpo'>" . $this->showWidget(new Product((int)($product_id), false, Configuration::get('PS_LANG_DEFAULT'))) . "</div>";
+    }
+  }
+
+  private function checkIfProductPage()
+  {
+    parse_str($_SERVER['QUERY_STRING'], $query);
+    if(!empty($query['id_product']) && !empty($query['controller']) && $query['controller'] == 'product')
+    {
+      return $query['id_product'];
+    }
+    return NULL;
+  }
+
+  private function isWidgetInTab()
+  {
+    return Configuration::get('yotpo_widget_location') == 'tab';
+  }
+  private function showWidget($product)
+  {
+    global $smarty;
+    $smarty->assign('yotpoAppkey', Configuration::get('yotpo_app_key'));
+    $smarty->assign('yotpoProductId', $product->id);
+    $smarty->assign('yotpoProductName', strip_tags($product->name));
+    $smarty->assign('yotpoProductDescription', strip_tags($product->description));
+    $smarty->assign('yotpoDomain', $this->_getShopDomain());
+    $smarty->assign('yotpoProductModel', $this->_getProductModel($product));
+    $smarty->assign('yotpoProductImageUrl', $this->_getProductImageUrl($product->id));
+    $smarty->assign('yotpoProductBreadCrumbs', $this->_getBreadCrumbs($product));
+    $smarty->assign('yotpoLanguage', Configuration::get('yotpo_language'));
+    
+    // TODO check if can insert this in header part so it will be loaded only once
+    echo "<script src ='http://www.yotpo.com/js/yQuery.js'></script>";
+    return $this->display(__FILE__,'tpl/widgetDiv.tpl');
+  }
+
   private function _getShopDomain()
   {
     if(method_exists('Tools', 'getShopDomain'))
@@ -140,6 +188,8 @@ class Yotpo extends Module
     Configuration::deleteByName('yotpo_oauth_token');
     Configuration::deleteByName('yotpo_map_enabled');
     Configuration::deleteByName('yotpo_language');
+    Configuration::deleteByName('yotpo_widget_location');
+    Configuration::deleteByName('yotpo_widget_tab_name');    
     return parent::uninstall();
   }
 
@@ -245,6 +295,8 @@ class Yotpo extends Module
       $secret_token = Tools::getValue('yotpo_oauth_token');
       $map_enabled = Tools::getValue('yotpo_map_enabled');
       $language = Tools::getValue('yotpo_language');
+      $location = Tools::getValue('yotpo_widget_location');
+      $tabName = Tools::getValue('yotpo_widget_tab_name');      
       if($api_key == '')
         return $this->_prepareError($this->l('Api key is missing'));
       if($map_enabled && $secret_token == '')
@@ -255,6 +307,8 @@ class Yotpo extends Module
       Configuration::updateValue('yotpo_app_key', Tools::getValue('yotpo_app_key'), false);
       Configuration::updateValue('yotpo_oauth_token', Tools::getValue('yotpo_oauth_token'), false);
       Configuration::updateValue('yotpo_language', $language, false);
+      Configuration::updateValue('yotpo_widget_location', $location, false);
+      Configuration::updateValue('yotpo_widget_tab_name', $tabName, false);      
       return $this->_prepareSuccess();
     }
   }
@@ -297,7 +351,9 @@ class Yotpo extends Module
         'appKey' => Tools::safeOutput(Tools::getValue('yotpo_app_key',Configuration::get('yotpo_app_key'))),
         'oauthToken' => Tools::safeOutput(Tools::getValue('yotpo_oauth_token',Configuration::get('yotpo_oauth_token'))),
         'mapEnabled' => Configuration::get('yotpo_map_enabled') == "0" ? false : true,
-        'widgetLanguage' => Configuration::get('yotpo_language')));
+        'widgetLanguage' => Configuration::get('yotpo_language'),
+        'widgetLocation' => Configuration::get('yotpo_widget_location'),
+        'tabName' => Configuration::get('yotpo_widget_tab_name')));
     
     $this->_html .= $this->display(__FILE__, 'tpl/settingsForm.tpl');
   }

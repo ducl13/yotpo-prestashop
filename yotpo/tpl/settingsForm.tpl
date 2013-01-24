@@ -41,6 +41,18 @@
           </select>
         </div>
 
+        <div class="y-label">{l s='Select widget location' mod='yotpo'}
+          <select name="yotpo_widget_location">
+            <option value="footer" {if $widgetLocation == "footer"}selected{/if}>Page footer</option>
+            <option value="tab" {if $widgetLocation == "tab"}selected{/if}>Tab</option>
+          </select>
+        </div>
+
+        <div class="y-label">{l s='Select tab name' mod='yotpo'}</div>
+        <div class="y-input">
+          <input type="text" name="yotpo_widget_tab_name" value="{$tabName}"/>
+        </div>
+
         <div class="y-label">{l s='App key' mod='yotpo'}</div>
         <div class="y-input">
           <input type="text" name="yotpo_app_key" value="{$appKey}"/>
