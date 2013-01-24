@@ -89,7 +89,7 @@ class Yotpo extends Module
     $product_id = $this->checkIfProductPage();
     if($product_id != NULL && $this->isWidgetInTab())
     {
-      return "<li><a href='#idTab-yotpo'> Reviews </a></li>"; 
+      return "<li><a href='#idTab-yotpo'> ". Configuration::get('yotpo_widget_tab_name') ." </a></li>"; 
     }
     return NULL;
   }
