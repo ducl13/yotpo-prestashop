@@ -43,8 +43,8 @@ class Yotpo extends Module
     }
     if (!$is_curl_installed || parent::install() == false OR !$this->registerHook('productfooter') 
                                                           OR !$this->registerHook('postUpdateOrderStatus')
-                                                          OR !$this->registerHook('displayProductTab')
-                                                          OR !$this->registerHook('displayProductTabContent')) {
+                                                          OR !$this->registerHook('productTab')
+                                                          OR !$this->registerHook('productTabContent')) {
       return false;  
     }
     // Set default language to english.
@@ -86,7 +86,7 @@ class Yotpo extends Module
   
   public function hookProductTab($params)
   { 
-    $product_id = $this->checkIfProductPage();
+    $product_id = $this->parseProductId();
     if($product_id != NULL && $this->isWidgetInTab())
     {
       return "<li><a href='#idTab-yotpo'> ". Configuration::get('yotpo_widget_tab_name') ." </a></li>"; 
@@ -96,17 +96,17 @@ class Yotpo extends Module
 
   public function hookProductTabContent($params)
   {
-    $product_id = $this->checkIfProductPage();
+    $product_id = $this->parseProductId();
     if($product_id != NULL && $this->isWidgetInTab())
     {
       return "<div id='idTab-yotpo'>" . $this->showWidget(new Product((int)($product_id), false, Configuration::get('PS_LANG_DEFAULT'))) . "</div>";
     }
   }
 
-  private function checkIfProductPage()
+  private function parseProductId()
   {
     parse_str($_SERVER['QUERY_STRING'], $query);
-    if(!empty($query['id_product']) && !empty($query['controller']) && $query['controller'] == 'product')
+    if(!empty($query['id_product']))
     {
       return $query['id_product'];
     }
