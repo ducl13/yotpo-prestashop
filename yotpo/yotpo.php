@@ -15,7 +15,7 @@ class Yotpo extends Module
 
       $this->name = 'yotpo';
       $this->tab = $version_test ? 'advertising_marketing' : 'Reviews';
-      $this->version = '1.0.4';
+      $this->version = '1.0.5';
       if($version_test)
         $this->author = 'Yotpo';
       $this->need_instance = 1;
