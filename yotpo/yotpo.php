@@ -60,7 +60,8 @@ class Yotpo extends Module
 
   public function hookproductfooter($params)
   {
-    if (!$this->isWidgetInTab())
+    $widgetLocation = Configuration::get('yotpo_widget_location');
+    if($widgetLocation == 'footer' || $widgetLocation == 'other')
     {
       return $this->showWidget($params['product']);  
     }
@@ -87,7 +88,7 @@ class Yotpo extends Module
   public function hookProductTab($params)
   { 
     $product_id = $this->parseProductId();
-    if($product_id != NULL && $this->isWidgetInTab())
+    if($product_id != NULL && Configuration::get('yotpo_widget_location') == 'tab')
     {
       return "<li><a href='#idTab-yotpo'> ". Configuration::get('yotpo_widget_tab_name') ." </a></li>"; 
     }
@@ -97,7 +98,7 @@ class Yotpo extends Module
   public function hookProductTabContent($params)
   {
     $product_id = $this->parseProductId();
-    if($product_id != NULL && $this->isWidgetInTab())
+    if($product_id != NULL && Configuration::get('yotpo_widget_location') == 'tab')
     {
       return "<div id='idTab-yotpo'>" . $this->showWidget(new Product((int)($product_id), false, Configuration::get('PS_LANG_DEFAULT'))) . "</div>";
     }
@@ -113,10 +114,6 @@ class Yotpo extends Module
     return NULL;
   }
 
-  private function isWidgetInTab()
-  {
-    return Configuration::get('yotpo_widget_location') == 'tab';
-  }
   private function showWidget($product)
   {
     global $smarty;
@@ -132,7 +129,11 @@ class Yotpo extends Module
     
     // TODO check if can insert this in header part so it will be loaded only once
     echo "<script src ='http://www.yotpo.com/js/yQuery.js'></script>";
-    return $this->display(__FILE__,'tpl/widgetDiv.tpl');
+    if(Configuration::get('yotpo_widget_location') != 'other')
+    {
+      return $this->display(__FILE__,'tpl/widgetDiv.tpl');
+    }
+    return NULL;
   }
 
   private function _getShopDomain()

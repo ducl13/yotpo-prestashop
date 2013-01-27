@@ -45,6 +45,7 @@
           <select name="yotpo_widget_location">
             <option value="footer" {if $widgetLocation == "footer"}selected{/if}>Page footer</option>
             <option value="tab" {if $widgetLocation == "tab"}selected{/if}>Tab</option>
+            <option value="other" {if $widgetLocation == "other"}selected{/if}>Other</option>
           </select>
         </div>
 
