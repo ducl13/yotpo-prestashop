@@ -106,10 +106,19 @@ class Yotpo extends Module
 
   private function parseProductId()
   {
-    parse_str($_SERVER['QUERY_STRING'], $query);
-    if(!empty($query['id_product']))
+    $product_id = (int)(Tools::getValue('id_product'));
+    
+    if(!empty($product_id))
     {
-      return $query['id_product'];
+      return $product_id;
+    }
+    else
+    {
+      parse_str($_SERVER['QUERY_STRING'], $query);
+      if(!empty($query['id_product']))
+      {
+        return $query['id_product'];
+      }
     }
     return NULL;
   }
