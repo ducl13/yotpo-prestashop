@@ -45,10 +45,30 @@
           <select name="yotpo_widget_location">
             <option value="footer" {if $widgetLocation == "footer"}selected{/if}>Page footer</option>
             <option value="tab" {if $widgetLocation == "tab"}selected{/if}>Tab</option>
-            <option value="other" {if $widgetLocation == "other"}selected{/if}>Other</option>
+            <option value="other" {if $widgetLocation == "other"}selected{/if}>Other (click update to see instructions)</option>
           </select>
         </div>
+        {if $widgetLocation == "other"}
+        <div class="y-label">{l s='If you’d like to place the Yotpo widget anywhere other than in a tab or in the footer place the following code in your desired location:' mod='yotpo'}</br> </br> 
+          <div class="y-code">
+            {literal}
 
+            &lt;div class=&quot;yotpo reviews&quot; </br>
+               data-appkey=&quot;{$yotpoAppkey}&quot;</br>
+               data-domain=&quot;{$yotpoDomain}&quot;</br>
+               data-product-id=&quot;{$yotpoProductId}&quot;</br>
+               data-product-models=&quot;{$yotpoProductModel}&quot; </br>
+               data-name=&quot;{$yotpoProductName}&quot; </br>
+               data-url=&quot;{$link-&gt;getProductLink($smarty.get.id_product, $smarty.get.id_product.link_rewrite)|escape:&#39;htmlall&#39;:&#39;UTF-8&#39;}&quot; </br>
+               data-image-url=&quot;{$yotpoProductImageUrl}&quot; </br>
+               data-description=&quot;{$yotpoProductDescription}&quot; </br>
+               data-bread-crumbs=&quot;{$yotpoProductBreadCrumbs}&quot;</br>
+               data-lang=&quot;{$yotpoLanguage}&quot;&gt; </br>
+              &lt;/div&gt;
+           {/literal}
+         </div>
+        </div>
+        {/if}
         <div class="y-label">{l s='Select tab name' mod='yotpo'}</div>
         <div class="y-input">
           <input type="text" name="yotpo_widget_tab_name" value="{$tabName}"/>

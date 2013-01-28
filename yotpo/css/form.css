@@ -12,6 +12,14 @@
 	padding-bottom: 40px;
 	margin: 0 auto;	
 }
+.y-code {
+	font-family: courier,monospace;
+	font-weight: lighter;
+	background: rgb(236, 236, 236);
+	padding: 15px;
+	font-style: italic;
+	border: 1px solid rgb(206, 206, 206);
+}
 .y-settings-title{
 	line-height: 20px;
 	color: #8A8A8A;
