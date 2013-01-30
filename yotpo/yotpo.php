@@ -15,7 +15,7 @@ class Yotpo extends Module
 
       $this->name = 'yotpo';
       $this->tab = $version_test ? 'advertising_marketing' : 'Reviews';
-      $this->version = '1.0.5';
+      $this->version = '1.0.6';
       if($version_test)
         $this->author = 'Yotpo';
       $this->need_instance = 1;
@@ -44,7 +44,8 @@ class Yotpo extends Module
     if (!$is_curl_installed || parent::install() == false OR !$this->registerHook('productfooter') 
                                                           OR !$this->registerHook('postUpdateOrderStatus')
                                                           OR !$this->registerHook('productTab')
-                                                          OR !$this->registerHook('productTabContent')) {
+                                                          OR !$this->registerHook('productTabContent')
+                                                          OR !$this->registerHook('header')) {
       return false;  
     }
     // Set default language to english.
@@ -56,6 +57,14 @@ class Yotpo extends Module
     // Set default widget tab name.
     Configuration::updateValue('yotpo_widget_tab_name', 'Reviews', false);    
     return true;
+  }
+
+  public function hookheader($params)
+  {   
+    global $smarty;
+    $smarty->assign('yotpoAppkey', Configuration::get('yotpo_app_key'));
+    $smarty->assign('yotpoDomain', $this->_getShopDomain());
+    return "<script src ='http://www.yotpo.com/js/yQuery.js'></script>";
   }
 
   public function hookproductfooter($params)
@@ -126,11 +135,9 @@ class Yotpo extends Module
   private function showWidget($product)
   {
     global $smarty;
-    $smarty->assign('yotpoAppkey', Configuration::get('yotpo_app_key'));
     $smarty->assign('yotpoProductId', $product->id);
     $smarty->assign('yotpoProductName', strip_tags($product->name));
     $smarty->assign('yotpoProductDescription', strip_tags($product->description));
-    $smarty->assign('yotpoDomain', $this->_getShopDomain());
     $smarty->assign('yotpoProductModel', $this->_getProductModel($product));
     $smarty->assign('yotpoProductImageUrl', $this->_getProductImageUrl($product->id));
     $smarty->assign('yotpoProductBreadCrumbs', $this->_getBreadCrumbs($product));
