@@ -31,6 +31,7 @@ class YotpoHttpClient
 		$user["password"] = $password;
 		$user['url'] = $url;
 		$data['user'] = $user;
+		$data['install_step'] = 'done';
 
 		return $this->makePostRequest(self::YOTPO_API_URL . '/users.json', $data);
 	}

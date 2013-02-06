@@ -49,7 +49,7 @@
           </select>
         </div>
         {if $widgetLocation == "other"}
-        <div class="y-label">{l s='If you’d like to place the Yotpo widget anywhere other than in a tab or in the footer place the following code in your desired location:' mod='yotpo'}</br> </br> 
+        <div class="y-label">{l s='In order to locate the widget in a custom position, please open the "root" folder, then enter the "themes" library. Locate the specific theme you would like the widget to show up on, and in this specific themes folder, locate the file "product.tpl". Add the code here, wherever you would like it placed.' mod='yotpo'}</br> </br> 
           <div class="y-code">
             {literal}
 
