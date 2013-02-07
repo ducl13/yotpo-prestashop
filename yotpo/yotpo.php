@@ -15,7 +15,7 @@ class Yotpo extends Module
 
       $this->name = 'yotpo';
       $this->tab = $version_test ? 'advertising_marketing' : 'Reviews';
-      $this->version = '1.0.6';
+      $this->version = '1.0.7';
       if($version_test)
         $this->author = 'Yotpo';
       $this->need_instance = 1;
@@ -29,6 +29,7 @@ class Yotpo extends Module
       if(!Configuration::get('yotpo_app_key'))
         $this->warning = $this->l('Set your api key in order to use this module correctly');
       $this->_httpClient = new YotpoHttpClient($this->name);
+      $this->defineBaseUrl();
     }
  
   public function install()
@@ -41,7 +42,13 @@ class Yotpo extends Module
       if (isset($this->_errors))
         $this->_errors[] = $this->l('Yotpo needs the PHP Curl extension, please ask your hosting provider to enable it prior to install this module.');
     }
-    if (!$is_curl_installed || parent::install() == false OR !$this->registerHook('productfooter') 
+    $version_mask = explode('.', _PS_VERSION_, 3);
+    $version_test = $version_mask[0] > 0 && $version_mask[1] >= 3;
+    if(!$version_test)
+    {
+      $this->_errors[] = $this->l('Minimum version required for Yotpo module is Prestashop 1.3'); 
+    }
+    if (!$version_test OR !$is_curl_installed OR parent::install() == false OR !$this->registerHook('productfooter') 
                                                           OR !$this->registerHook('postUpdateOrderStatus')
                                                           OR !$this->registerHook('productTab')
                                                           OR !$this->registerHook('productTabContent')
@@ -55,7 +62,7 @@ class Yotpo extends Module
     Configuration::updateValue('yotpo_widget_location', 'footer', false);
 
     // Set default widget tab name.
-    Configuration::updateValue('yotpo_widget_tab_name', 'Reviews', false);    
+    Configuration::updateValue('yotpo_widget_tab_name', 'Reviews', false);   
     return true;
   }
 
@@ -139,7 +146,7 @@ class Yotpo extends Module
     $smarty->assign('yotpoProductName', strip_tags($product->name));
     $smarty->assign('yotpoProductDescription', strip_tags($product->description));
     $smarty->assign('yotpoProductModel', $this->_getProductModel($product));
-    $smarty->assign('yotpoProductImageUrl', $this->_getProductImageUrl($product->id));
+    $smarty->assign('yotpoProductImageUrl', $this->getProductImageUrl($product->id));
     $smarty->assign('yotpoProductBreadCrumbs', $this->_getBreadCrumbs($product));
     $smarty->assign('yotpoLanguage', Configuration::get('yotpo_language'));
     
@@ -159,8 +166,8 @@ class Yotpo extends Module
     return str_replace('www.', '', $_SERVER['HTTP_HOST']);;
   }
 
-  public function _getProductImageUrl($id_product)
-  {
+  public function getProductImageUrl($id_product)
+  {  
     $id_image = Product::getCover($id_product);
     // get Image by id
     if (sizeof($id_image) > 0) {
@@ -172,23 +179,12 @@ class Yotpo extends Module
     return NULL;
   }
 
-
   public function getExistingImgPath($image)
-  {
+  {  
     if (!$image->id)
       return NULL;
     if (file_exists(_PS_PROD_IMG_DIR_.$image->id_product.'-'.$image->id.'.jpg'))
       return _PS_BASE_URL_._THEME_PROD_DIR_.$image->id_product.'-'.$image->id.'.'.'jpg';     
-  }
-
-  public function getCurrency($id_order)
-  {
-        $id_currency = (int)Db::getInstance()->getValue('
-        SELECT id_currency
-        FROM '._DB_PREFIX_.'orders
-        WHERE id_order = '.(int)$id_order);        
-        return Currency::getCurrency($id_currency);
-        
   }
   
   public function getOrderDetails($id_order)
@@ -251,6 +247,33 @@ class Yotpo extends Module
     return $this->_html;
   }
 
+  public function getProductLink($product_id)
+  {     
+    if(!isset($this->context) OR !isset($this->context->link) OR !method_exists($this->context->link, 'getProductLink'))
+    {
+      global $link;
+      if(isset($link) AND method_exists($link, 'getProductLink'))
+      {
+        return $link->getProductLink($product_id);
+      }
+      else
+      {
+        $full_product = new Product($product_id, false);
+        return $full_product->getLink();
+      }
+    }
+    return $this->context->link->getProductLink($product_id);  
+  }
+  
+  public function getDescritpion($product,$lang_id)
+  {
+    if(!empty($product['description_short']))
+    {      
+      return strip_tags($product['description_short']);
+    }
+    $full_product = new Product($product['id_product'], false, $lang_id);
+    return strip_tags($full_product->description);
+  }
 
   private function _processRegistrationForm()
   {
@@ -423,5 +446,20 @@ class Yotpo extends Module
   {
     $this->_html .= sprintf('<div class="conf confirm">%s</div>', $message == '' ? $this->l('Settings updated') : $message);
   }
+
+  private function getBaseUrl()
+  {
+    $domain = (isset($_SERVER['HTTP_X_FORWARDED_HOST']) ? $_SERVER['HTTP_X_FORWARDED_HOST'] : $_SERVER['HTTP_HOST']);
+    $domain = 'http://'.$domain;
+    return $domain;
+  }
+
+  private function defineBaseUrl()
+  {
+    if(!defined('_PS_BASE_URL_'))
+    {
+      define('_PS_BASE_URL_', $this->getBaseUrl());
+    } 
+  }  
 }
 ?>

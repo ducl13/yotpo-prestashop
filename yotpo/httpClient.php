@@ -59,7 +59,6 @@ class YotpoHttpClient
 		
 		if(isset($token))
 		{
-			
 			$data = array();
 			$data['utoken'] = $token;
 		    $customer = NULL;
@@ -72,28 +71,20 @@ class YotpoHttpClient
 		    $data["order_id"] = $params['id_order'];
 		    $data['platform'] = 'prestashop';
 
-		    $products = $context->getOrderDetails($params['id_order']);
 		    $products_arr = array();
-
-   		    $currency = $context->getCurrency($params['id_order']);
-		    $data["currency_iso"] = $currency['iso_code'];
-
+		    $currency = Currency::getCurrencyInstance($params['cart']->id_currency);
+		    $data["currency_iso"] = $currency->iso_code;
+		    $products = $params['cart']->getProducts();
 		    foreach ($products as $product) {
 
-		      $product_data = array();
-		      
-		      $full_product = new Product((int)($product['product_id']), false, (int)($params['cookie']->id_lang));      
-		      $product_data['url'] = $full_product->getLink();  
-		      $product_data['name'] = $full_product->name;
-		      $product_data['image'] = $context->_getProductImageUrl($product['product_id']);
-		      $product_data['description'] = strip_tags($full_product->description);
+		      $product_data = array();    
+		      $product_data['url'] = $context->getProductLink($product['id_product']); 
+		      $product_data['name'] = $product['name'];
+		      $product_data['image'] = $context->getProductImageUrl($product['id_product']);
+		      $product_data['description'] = $context->getDescritpion($product, intval($params['cookie']->id_lang));
+			  $product_data['price'] = $product['price'];
 
-		      if (isset($product['total_price_tax_excl']))
-		     	$product_data['price'] = $product['total_price_tax_excl'];
-		      else
-	 			$product_data['price'] = $product['product_price'];
-
-		      $products_arr[$product['product_id']] = $product_data;
+		      $products_arr[$product['id_product']] = $product_data;
 		    }
 
 		    $data['products'] = $products_arr;

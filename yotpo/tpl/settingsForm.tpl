@@ -85,7 +85,7 @@
         </div>
 
         <div class="y-label">{l s='Mail after purchase' mod='yotpo'}
-            <input type="checkbox" name="yotpo_map_enabled" value="yotpo_map_enabled" {if $mapEnabled}checked="checked"{/if} </>
+            <input type="checkbox" name="yotpo_map_enabled" value="yotpo_map_enabled" {if $mapEnabled}checked="checked"{/if} />
         </div>
         
       </fieldset>
