@@ -1,3 +1,10 @@
+2012-02-07-12-07-00
+----
+Alon:
+1) Bug fix, some stores didn't have the store base url const defined in them.
+2) Verify that the module will only be installed for Prestashop stores above 1.3.x
+3) Change the way we pull data about the products in the mail after purchase.
+
 2012-02-06-12-07-00
 ----
 Alon:
