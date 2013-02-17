@@ -6,11 +6,11 @@
             {if $appKey && $appKey != '' && $oauthToken && $oauthToken != ''}
               <a class="y-href" href="https://api.yotpo.com/users/b2blogin?app_key={$appKey}&secret={$oauthToken}" target="_blank">Yotpo Dashboard.</a></div> 
             {else}
-              <a class="y-href" href="https://api.yotpo.com/users/sign_in" target="_blank">Yotpo Dashboard.</a></div> 
+              <a class="y-href" href="https://www.yotpo.com/?login=true" target="_blank">Yotpo Dashboard.</a></div> 
             {/if}
            {/if}
    {if $allreadyUsingYotpo}<div class="y-settings-title">To get your api key and secret token  
-     <a class="y-href" href="https://api.yotpo.com/users/sign_in" target="_blank">log in here.</a></div> 
+     <a class="y-href" href="https://www.yotpo.com/?login=true" target="_blank">log in here</a>, And go to your account settings.</div> 
    {/if}
 
       {if $finishedRegistration}<div class="y-settings-title">All set! The Yotpo widget is now properly installed on your shop. </br>
@@ -18,7 +18,7 @@
       {if $appKey && $appKey != '' && $oauthToken && $oauthToken != ''}
         <a class="y-href" href="https://api.yotpo.com/users/b2blogin?app_key={$appKey}&secret={$oauthToken}" target="_blank">Yotpo Dashboard.</a></div> 
       {else}
-        <a class="y-href" href="https://api.yotpo.com/users/sign_in" target="_blank">Yotpo Dashboard.</a></div> 
+        <a class="y-href" href="https://www.yotpo.com/?login=true" target="_blank">Yotpo Dashboard.</a></div> 
       {/if}
     {/if}
 
