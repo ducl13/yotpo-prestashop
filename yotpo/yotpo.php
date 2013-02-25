@@ -22,10 +22,14 @@ class Yotpo extends Module
  
       parent::__construct();
    
-      $this->displayName = $this->l('Yotpo');
+      $this->displayName = $this->l('Add Reviews - Social reviews by Yotpo');
       $this->description = $this->l('The #1 reviews add-on for SMBs. Generate beautiful, trusted reviews for your shop.');
 
-      include_once(_PS_MODULE_DIR_.'yotpo/httpClient.php');
+      if(!class_exists('YotpoHttpClient'))
+      {
+        $_ds = defined('DS') ? DS : '/';
+        $this->checkIncludedFiles(true, array(dirname(__FILE__) . $_ds . 'httpClient.php', _PS_MODULE_DIR_.'yotpo/httpClient.php'));
+      }
       if(!Configuration::get('yotpo_app_key'))
         $this->warning = $this->l('Set your api key in order to use this module correctly');
       $this->_httpClient = new YotpoHttpClient($this->name);
@@ -43,16 +47,40 @@ class Yotpo extends Module
         $this->_errors[] = $this->l('Yotpo needs the PHP Curl extension, please ask your hosting provider to enable it prior to install this module.');
     }
     $version_mask = explode('.', _PS_VERSION_, 3);
+    $_ds = defined('DS') ? DS : '/';
+    $include_client = $this->checkIncludedFiles(false, array(dirname(__FILE__) . $_ds . 'httpClient.php', _PS_MODULE_DIR_.'yotpo/httpClient.php'));
+    $include_oauth_store = $this->checkIncludedFiles(false, array(dirname(__FILE__) . $_ds . 'lib'. $_ds .'oauth-php' . $_ds . 'library' . $_ds . 'OAuthStore.php', _PS_MODULE_DIR_. $this->name . $_ds . 'lib'. $_ds .'oauth-php' . $_ds . 'library' . $_ds . 'OAuthStore.php'));
+    $include_oauth_requester = $this->checkIncludedFiles(false, array(dirname(__FILE__) . $_ds . 'lib'. $_ds .'oauth-php' . $_ds . 'library' . $_ds . 'OAuthRequester.php', _PS_MODULE_DIR_ . $this->name . $_ds . 'lib'. $_ds .'oauth-php' . $_ds . 'library' . $_ds . 'OAuthRequester.php'));    
     $version_test = $version_mask[0] > 0 && $version_mask[1] >= 3;
     if(!$version_test)
     {
       $this->_errors[] = $this->l('Minimum version required for Yotpo module is Prestashop 1.3'); 
     }
-    if (!$version_test OR !$is_curl_installed OR parent::install() == false OR !$this->registerHook('productfooter') 
-                                                          OR !$this->registerHook('postUpdateOrderStatus')
-                                                          OR !$this->registerHook('productTab')
-                                                          OR !$this->registerHook('productTabContent')
-                                                          OR !$this->registerHook('header')) {
+    
+    if(!$include_client)
+    {
+      $this->_errors[] = $this->l('Can\'t include file yotpo/httpClient.php'); 
+    }
+    if(!$include_oauth_store)
+    {
+      $this->_errors[] = $this->l('Can\'t include file yotpo/lib//oauth-php/library/OAuthStore.php'); 
+    }
+    if(!$include_oauth_requester)
+    {
+      $this->_errors[] = $this->l('Can\'t include file yotpo/OAuthRequester.php'); 
+    }
+
+    if (!$include_client OR 
+        !$include_oauth_store OR 
+        !$include_oauth_requester OR 
+        !$version_test OR 
+        !$is_curl_installed OR 
+        parent::install() == false OR 
+        !$this->registerHook('productfooter') OR 
+        !$this->registerHook('postUpdateOrderStatus') OR 
+        !$this->registerHook('productTab') OR 
+        !$this->registerHook('productTabContent') OR 
+        !$this->registerHook('header')) {
       return false;  
     }
     // Set default language to english.
@@ -460,6 +488,20 @@ class Yotpo extends Module
     {
       define('_PS_BASE_URL_', $this->getBaseUrl());
     } 
-  }  
+  }
+  private function checkIncludedFiles($is_include, $paths)
+  {
+    $result = false;
+    $_ds = defined('DS') ? DS : '/';
+    foreach ($paths as $key => $value) 
+    {
+      if(stream_resolve_include_path($value))
+      {
+        $is_include ? $result = include_once($value) : $result = true;
+        break;
+      }
+    }
+    return $result;
+  }   
 }
 ?>
