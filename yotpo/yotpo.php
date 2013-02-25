@@ -15,7 +15,7 @@ class Yotpo extends Module
 
       $this->name = 'yotpo';
       $this->tab = $version_test ? 'advertising_marketing' : 'Reviews';
-      $this->version = '1.0.8';
+      $this->version = '1.0.9';
       if($version_test)
         $this->author = 'Yotpo';
       $this->need_instance = 1;
@@ -25,10 +25,10 @@ class Yotpo extends Module
       $this->displayName = $this->l('Add Reviews - Social reviews by Yotpo');
       $this->description = $this->l('The #1 reviews add-on for SMBs. Generate beautiful, trusted reviews for your shop.');
 
-      if(!class_exists('YotpoHttpClient'))
+      if(!class_exists('YotpoHttpClient', false))
       {
         $_ds = defined('DS') ? DS : '/';
-        $this->checkIncludedFiles(true, array(dirname(__FILE__) . $_ds . 'httpClient.php', _PS_MODULE_DIR_.'yotpo/httpClient.php'));
+        $this->checkIncludedFiles(true, array(dirname(__FILE__) . $_ds . 'httpClient.php', _PS_MODULE_DIR_ . $this->name . $_ds . 'httpClient.php'));
       }
       if(!Configuration::get('yotpo_app_key'))
         $this->warning = $this->l('Set your api key in order to use this module correctly');

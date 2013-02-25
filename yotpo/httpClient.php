@@ -115,7 +115,7 @@ class YotpoHttpClient
 
 	private function grantOauthAccess($app_key, $secret_token)
 	{
-	    if(!class_exists('OAuthStore'))
+	    if(!class_exists('OAuthStore', false))
 	    {	
 	    	$_ds = defined('DS') ? DS : '/';
 	    	$OAuthStorePath =  dirname(__FILE__) . $_ds . 'lib'. $_ds .'oauth-php' . $_ds . 'library' . $_ds . 'OAuthStore.php';
