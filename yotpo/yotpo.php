@@ -126,13 +126,14 @@ class Yotpo extends Module
 								 defined('PS_OS_SHIPPING') ? (int)Configuration::get(PS_OS_SHIPPING) : _PS_OS_SHIPPING_);
 		if(in_array($params['newOrderStatus']->id, $accepted_status))
 		{
+			$data = $this->prepareMapData($params);
 			$app_key = Configuration::get('yotpo_app_key');
 			$secret = Configuration::get('yotpo_oauth_token');
 			$enable_feature = Configuration::get('yotpo_map_enabled');
 
-			if(isset($app_key) AND isset($secret) AND $enable_feature == "1")
+			if(isset($app_key) && isset($secret) && $enable_feature == "1" && !is_null($data))
 			{
-				$this->httpClient()->makeMapRequest($params, $app_key, $secret, $this);				
+				$this->httpClient()->makeMapRequest($data, $app_key, $secret);				
 			}
 		}
 	}
@@ -154,31 +155,6 @@ class Yotpo extends Module
 		{
 			return "<div id='idTab-yotpo'>" . $this->showWidget(new Product((int)($product_id), false, Configuration::get('PS_LANG_DEFAULT'))) . "</div>";
 		}
-	}
-
-	public function getProductImageUrl($id_product)
-	{
-		$id_image = Product::getCover($id_product);
-		// get Image by id
-		if (sizeof($id_image) > 0) {
-			$image = new Image($id_image['id_image']);
-			// get image full URL
-
-			return $image_url = method_exists($image, 'getExistingImgPath') ? _PS_BASE_URL_._THEME_PROD_DIR_.$image->getExistingImgPath().".jpg" : $this->getExistingImgPath($image);
-		}
-		return NULL;
-	}
-
-	public function getExistingImgPath($image)
-	{
-		if (!$image->id)
-		{
-			return NULL;	
-		}
-		if (file_exists(_PS_PROD_IMG_DIR_.$image->id_product.'-'.$image->id.'.jpg'))
-		{
-			return _PS_BASE_URL_._THEME_PROD_DIR_.$image->id_product.'-'.$image->id.'.'.'jpg';	
-		}	
 	}
 
 	public function getOrderDetails($id_order)
@@ -247,7 +223,32 @@ class Yotpo extends Module
 		return $this->_html;
 	}
 
-	public function getProductLink($product_id)
+	private function getProductImageUrl($id_product)
+	{
+		$id_image = Product::getCover($id_product);
+		// get Image by id
+		if (sizeof($id_image) > 0) {
+			$image = new Image($id_image['id_image']);
+			// get image full URL
+
+			return $image_url = method_exists($image, 'getExistingImgPath') ? _PS_BASE_URL_._THEME_PROD_DIR_.$image->getExistingImgPath().".jpg" : $this->getExistingImgPath($image);
+		}
+		return NULL;
+	}
+
+	private function getExistingImgPath($image)
+	{
+		if (!$image->id)
+		{
+			return NULL;	
+		}
+		if (file_exists(_PS_PROD_IMG_DIR_.$image->id_product.'-'.$image->id.'.jpg'))
+		{
+			return _PS_BASE_URL_._THEME_PROD_DIR_.$image->id_product.'-'.$image->id.'.'.'jpg';	
+		}	
+	}
+
+	private function getProductLink($product_id)
 	{
 		if(isset($this->context) && isset($this->context->link) && method_exists($this->context->link, 'getProductLink'))
 		{
@@ -265,7 +266,7 @@ class Yotpo extends Module
 		}
 	}
 
-	public function getDescritpion($product,$lang_id)
+	private function getDescritpion($product,$lang_id)
 	{
 		if(!empty($product['description_short']))
 		{
@@ -519,5 +520,43 @@ class Yotpo extends Module
 	{
 		$this->_html .= sprintf('<div class="conf confirm">%s</div>', $message == '' ? $this->l('Settings updated') : $message);
 	}
+
+	private function prepareMapData($params)
+	{
+		$data = array();
+	    $customer = NULL;
+
+        $order = new Order((int)$params['id_order']);
+        $customer = new Customer((int)$order->id_customer);
+        $cart = Cart::getCartByOrderId($params['id_order']);
+        if(Validate::isLoadedObject($order) && Validate::isLoadedObject($customer) && Validate::isLoadedObject($cart))
+        {
+        	$products = $cart->getProducts();
+        	$currency = Currency::getCurrencyInstance($cart->id_currency);
+        	if(!is_null($products) && is_array($products) && Validate::isLoadedObject($currency))
+        	{
+	    	    $data["order_date"] = $order->date_add;
+			    $data["email"] = $customer->email;
+			    $data["customer_name"] = $customer->firstname . ' ' . $customer->lastname;
+			    $data["order_id"] = $params['id_order'];
+			    $data['platform'] = 'prestashop';
+			    $products_arr = array();
+			    $data["currency_iso"] = $currency->iso_code;			    
+			    foreach ($products as $product) 
+			    {
+					$product_data = array();    
+					$product_data['url'] = $this->getProductLink($product['id_product']); 
+					$product_data['name'] = $product['name'];
+					$product_data['image'] = $this->getProductImageUrl($product['id_product']);
+					$product_data['description'] = $this->getDescritpion($product, intval($params['cookie']->id_lang));
+					$product_data['price'] = $product['price'];
+
+					$products_arr[$product['id_product']] = $product_data;
+			    }
+			    return $data['products'] = $products_arr;
+        	}
+        }
+	 	return NULL;
+	}	
 }
 ?>

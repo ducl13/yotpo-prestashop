@@ -52,42 +52,12 @@ class YotpoHttpClient
 		return $token;
 	}
 
-	public function makeMapRequest($params, $app_key, $secret_token, $context)
+	public function makeMapRequest($data, $app_key, $secret_token)
 	{
-
 		$token = $this->grantOauthAccess($app_key, $secret_token);
-		
 		if(isset($token))
 		{
-			$data = array();
 			$data['utoken'] = $token;
-		    $customer = NULL;
-
-	        $order = new Order((int)$params['id_order']);
-	        $customer = new Customer((int)$order->id_customer);
-		    $data["order_date"] = $order->date_add;
-		    $data["email"] = $customer->email;
-		    $data["customer_name"] = $customer->firstname . ' ' . $customer->lastname;
-		    $data["order_id"] = $params['id_order'];
-		    $data['platform'] = 'prestashop';
-
-		    $products_arr = array();
-		    $currency = Currency::getCurrencyInstance($params['cart']->id_currency);
-		    $data["currency_iso"] = $currency->iso_code;
-		    $products = $params['cart']->getProducts();
-		    foreach ($products as $product) {
-
-		      $product_data = array();    
-		      $product_data['url'] = $context->getProductLink($product['id_product']); 
-		      $product_data['name'] = $product['name'];
-		      $product_data['image'] = $context->getProductImageUrl($product['id_product']);
-		      $product_data['description'] = $context->getDescritpion($product, intval($params['cookie']->id_lang));
-			  $product_data['price'] = $product['price'];
-
-		      $products_arr[$product['id_product']] = $product_data;
-		    }
-
-		    $data['products'] = $products_arr;
 		    $this->makePostRequest(self::YOTPO_API_URL . '/apps/' . $app_key . "/purchases/", $data);
 		}
 	}
