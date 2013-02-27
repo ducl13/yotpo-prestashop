@@ -541,7 +541,8 @@ class Yotpo extends Module
 
 					$products_arr[$product['id_product']] = $product_data;
 			    }
-			    return $data['products'] = $products_arr;
+			    $data['products'] = $products_arr;
+			    return $data;
         	}
         }
 	 	return NULL;
