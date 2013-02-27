@@ -95,8 +95,6 @@ class Yotpo extends Module
 		// Set default widget tab name.
 		Configuration::updateValue('yotpo_widget_tab_name', 'Reviews', false);
 
-		Configuration::updateValue('yotpo_dir_module', $this->_yotpo_module_path, false);
-
 		return true;
 	}
 
@@ -165,7 +163,6 @@ class Yotpo extends Module
 		Configuration::deleteByName('yotpo_language');
 		Configuration::deleteByName('yotpo_widget_location');
 		Configuration::deleteByName('yotpo_widget_tab_name');
-		Configuration::deleteByName('yotpo_dir_module');
 		return parent::uninstall();
 	}
 
