@@ -38,6 +38,9 @@
             <option value="pt" {if $widgetLanguage == "pt"}selected{/if}>Portuguese</option>
             <option value="sv" {if $widgetLanguage == "sv"}selected{/if}>Swedish</option>
             <option value="vi" {if $widgetLanguage == "vi"}selected{/if}>Vietnamese</option>
+            <option value="da" {if $widgetLanguage == "da"}selected{/if}>Danish</option>
+            <option value="ru" {if $widgetLanguage == "ru"}selected{/if}>Russian</option>
+            <option value="tr" {if $widgetLanguage == "tr"}selected{/if}>Turkish</option>
           </select>
         </div>
 

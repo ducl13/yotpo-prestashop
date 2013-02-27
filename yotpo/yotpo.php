@@ -157,18 +157,6 @@ class Yotpo extends Module
 		}
 	}
 
-	public function getOrderDetails($id_order)
-	{
-		if(method_exists('OrderDetail', 'getList'))
-		{
-			return OrderDetail::getList($id_order);	
-		}
-		else
-		{
-			return Db::getInstance()->executeS('SELECT * FROM `'._DB_PREFIX_.'order_detail` WHERE `id_order` = '.(int)$id_order);
-		}
-	}
-
 	public function uninstall()
 	{
 		Configuration::deleteByName('yotpo_app_key');
