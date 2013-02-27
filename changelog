@@ -1,3 +1,11 @@
+2012-02-27
+----
+Alon:
+1) bug fix in the way including files, the oauth library could in some cases be included based on a wrong path.
+2) Insure upon installation that all required files can be included.
+3) Remove map data getharing from yotpohttpclient to yotpo, and make null checks to params we get from the store.
+4) add russian turkish and danish to the supported languages.  
+
 2012-02-17
 ----
 Alon:
