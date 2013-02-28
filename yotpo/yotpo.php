@@ -601,7 +601,7 @@ class Yotpo extends Module
 					$product_data['price'] = $product['price'];
 
 					$products_arr[$product['id_product']] = $product_data;
-<<<<<<< HEAD
+
 			    }
 			    $data['products'] = $products_arr;
 			    return $data;
@@ -609,14 +609,6 @@ class Yotpo extends Module
         }
 	 	return NULL;
 	}	
-=======
-		    	}
-		    	$data['products'] = $products_arr;
-		    	return $data;
-       		}
-		}
-       	return NULL;
-	}
 	
 	private function getPastOrders()
 	{
@@ -653,6 +645,5 @@ class Yotpo extends Module
 		}
 		return NULL;
 	}		
->>>>>>> ca402ea... yotpo/httpClient.php
 }
 ?>
