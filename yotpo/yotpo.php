@@ -185,10 +185,8 @@ class Yotpo extends Module
 		Configuration::deleteByName('yotpo_language');
 		Configuration::deleteByName('yotpo_widget_location');
 		Configuration::deleteByName('yotpo_widget_tab_name');
-<<<<<<< HEAD
-=======
 		Configuration::deleteByName('yotpo_past_orders');
->>>>>>> ca402ea... yotpo/httpClient.php
+
 		return parent::uninstall();
 	}
 
