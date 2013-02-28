@@ -85,14 +85,10 @@
         <div class="y-label">{l s='Secret token' mod='yotpo'}</div>
         <div class="y-input">
           <input type="text" name="yotpo_oauth_token" value="{$oauthToken}"/>
-        </div>
-
-        <div class="y-label">{l s='Mail after purchase' mod='yotpo'}
-            <input type="checkbox" name="yotpo_map_enabled" value="yotpo_map_enabled" {if $mapEnabled}checked="checked"{/if} />
-        </div>
-        
+        </div>        
       </fieldset>
       <div class="y-footer">
+        <input type="submit" name="yotpo_past_orders" value="{l s='Submit past orders' mod='yotpo'}" class="y-submit-btn">
         <input type="submit" name="yotpo_settings" value="{l s='Update' mod='yotpo'}" class="y-submit-btn" />
       </div>
     </form>
