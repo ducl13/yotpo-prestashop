@@ -27,7 +27,7 @@ class Yotpo extends Module
 
 		parent::__construct();
 		 
-		$this->displayName = $this->l('Add Reviews - Social reviews by Yotpo');
+		$this->displayName = $this->l('AddReviews - Social reviews by Yotpo');
 		$this->description = $this->l('The #1 reviews add-on for SMBs. Generate beautiful, trusted reviews for your shop.');
 		$this->_yotpo_module_path = _PS_MODULE_DIR_ . $this->name;
 
