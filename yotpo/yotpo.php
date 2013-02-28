@@ -5,10 +5,14 @@ if (!defined('_PS_VERSION_')){
 
 class Yotpo extends Module
 {
+	const PAST_ORDERS_DAYS_BACK = 30;
+	const PAST_ORDERS_LIMIT = 10000;
+	const BULK_SIZE = 1000;	
 	private $_html = '';
 	private $_httpClient = NULL;
 	private $_yotpo_module_path = '';
-	
+	private static $_MAP_STATUS = NULL;
+
 	private $_required_files = array('/httpClient.php', '/lib/oauth-php/library/OAuthStore.php', '/lib/oauth-php/library/OAuthRequester.php'); 
 	
 	public function __construct()
@@ -43,6 +47,27 @@ class Yotpo extends Module
 		$domain = (isset($_SERVER['HTTP_X_FORWARDED_HOST']) ? $_SERVER['HTTP_X_FORWARDED_HOST'] : $_SERVER['HTTP_HOST']);
 		$domain = 'http://'.$domain;
 		return $domain;
+	}
+
+	public static function getAcceptedMapStatuses()
+	{
+		if(is_null(self::$_MAP_STATUS))
+		{
+			self::$_MAP_STATUS = array();
+			$statuses = array('PS_OS_WS_PAYMENT', 'PS_OS_PAYMENT','PS_OS_DELIVERED','PS_OS_SHIPPING');
+			foreach ($statuses as $status)
+			{
+				if(defined($status))
+				{
+					self::$_MAP_STATUS[] = (int)Configuration::get($status);
+				}
+				elseif (defined('_'.$status.'_')) 
+				{
+					self::$_MAP_STATUS[] = constant('_'.$status.'_');
+				}
+			}
+		}
+		return self::$_MAP_STATUS;
 	}
 
 	public static function defineBaseUrl()
@@ -118,18 +143,15 @@ class Yotpo extends Module
 
 	public function hookpostUpdateOrderStatus($params)
 	{
-		$accepted_status = array(defined('PS_OS_WS_PAYMENT') ? (int)Configuration::get(PS_OS_WS_PAYMENT) : _PS_OS_WS_PAYMENT_,
-								 defined('PS_OS_PAYMENT') ? (int)Configuration::get(PS_OS_PAYMENT) : _PS_OS_PAYMENT_,
-								 defined('PS_OS_DELIVERED') ? (int)Configuration::get(PS_OS_DELIVERED) : _PS_OS_DELIVERED_,
-								 defined('PS_OS_SHIPPING') ? (int)Configuration::get(PS_OS_SHIPPING) : _PS_OS_SHIPPING_);
+		$accepted_status = self::getAcceptedMapStatuses();
+
 		if(in_array($params['newOrderStatus']->id, $accepted_status))
 		{
 			$data = $this->prepareMapData($params);
 			$app_key = Configuration::get('yotpo_app_key');
 			$secret = Configuration::get('yotpo_oauth_token');
-			$enable_feature = Configuration::get('yotpo_map_enabled');
 
-			if(isset($app_key) && isset($secret) && $enable_feature == "1" && !is_null($data))
+			if(isset($app_key) && isset($secret) && !is_null($data))
 			{
 				$this->httpClient()->makeMapRequest($data, $app_key, $secret);				
 			}
@@ -163,6 +185,10 @@ class Yotpo extends Module
 		Configuration::deleteByName('yotpo_language');
 		Configuration::deleteByName('yotpo_widget_location');
 		Configuration::deleteByName('yotpo_widget_tab_name');
+<<<<<<< HEAD
+=======
+		Configuration::deleteByName('yotpo_past_orders');
+>>>>>>> ca402ea... yotpo/httpClient.php
 		return parent::uninstall();
 	}
 
@@ -392,7 +418,6 @@ class Yotpo extends Module
 
 			$api_key = Tools::getValue('yotpo_app_key');
 			$secret_token = Tools::getValue('yotpo_oauth_token');
-			$map_enabled = Tools::getValue('yotpo_map_enabled');
 			$language = Tools::getValue('yotpo_language');
 			$location = Tools::getValue('yotpo_widget_location');
 			$tabName = Tools::getValue('yotpo_widget_tab_name');
@@ -404,14 +429,36 @@ class Yotpo extends Module
 			{
 				return $this->prepareError($this->l('Please fill out the secret token'));	
 			}
-			$yotpo_map_enabled = Tools::getValue('yotpo_map_enabled') == false ? "0" : "1";
-			Configuration::updateValue('yotpo_map_enabled', $yotpo_map_enabled, false);
 			Configuration::updateValue('yotpo_app_key', Tools::getValue('yotpo_app_key'), false);
 			Configuration::updateValue('yotpo_oauth_token', Tools::getValue('yotpo_oauth_token'), false);
 			Configuration::updateValue('yotpo_language', $language, false);
 			Configuration::updateValue('yotpo_widget_location', $location, false);
 			Configuration::updateValue('yotpo_widget_tab_name', $tabName, false);
 			return $this->prepareSuccess();
+		}
+		elseif(Tools::isSubmit('yotpo_past_orders'))
+		{
+			Configuration::updateValue('yotpo_past_orders', 1, false);
+			$api_key = Tools::getValue('yotpo_app_key');
+			$secret_token = Tools::getValue('yotpo_oauth_token');
+			$past_orders = $this->getPastOrders();
+			$is_success = true;
+			foreach ($past_orders as $post_bulk) 
+			{
+				if(!is_null($post_bulk))
+				{
+					$response = $this->httpClient()->makePastOrdersRequest($post_bulk, $api_key, $secret_token);
+					if ($response['code'] != 200 && $is_success)
+					{
+						$is_success = false;
+						$this->prepareError($this->l($response['message']));
+					}
+				}
+			}
+			if($is_success)
+			{
+				$this->prepareSuccess('Past orders sent successfully');
+			}	
 		}
 	}
 
@@ -452,9 +499,9 @@ class Yotpo extends Module
         'action' => Tools::safeOutput($_SERVER['REQUEST_URI']),
         'appKey' => Tools::safeOutput(Tools::getValue('yotpo_app_key',Configuration::get('yotpo_app_key'))),
         'oauthToken' => Tools::safeOutput(Tools::getValue('yotpo_oauth_token',Configuration::get('yotpo_oauth_token'))),
-        'mapEnabled' => Configuration::get('yotpo_map_enabled') == "0" ? false : true,
-        'widgetLanguage' => Configuration::get('yotpo_language'),
+        'widgetLanguage' => Configuration::get('yotpo_language'),       
         'widgetLocation' => Configuration::get('yotpo_widget_location'),
+		'showPastOrdersButton' => Configuration::get('yotpo_past_orders') != 1 ? true : false,         
         'tabName' => Configuration::get('yotpo_widget_tab_name')));
 
 		$this->_html .= $this->display(__FILE__, 'tpl/settingsForm.tpl');
@@ -508,35 +555,55 @@ class Yotpo extends Module
 
 	private function prepareMapData($params)
 	{
-		$data = array();
-	    $customer = NULL;
 
         $order = new Order((int)$params['id_order']);
         $customer = new Customer((int)$order->id_customer);
-        $cart = Cart::getCartByOrderId($params['id_order']);
-        if(Validate::isLoadedObject($order) && Validate::isLoadedObject($customer) && Validate::isLoadedObject($cart))
+		$id_lang = !is_null($params['cookie']) && !is_null($params['cookie']->id_lang) ? $params['cookie']->id_lang : Configuration::get('PS_LANG_DEFAULT');
+        if(Validate::isLoadedObject($order) && Validate::isLoadedObject($customer))
         {
-        	$products = $cart->getProducts();
-        	$currency = Currency::getCurrencyInstance($cart->id_currency);
-        	if(!is_null($products) && is_array($products) && Validate::isLoadedObject($currency))
+        	$singleMapParams = array('id_order' => (int)$params['id_order'],
+        								'date_add' => $order->date_add,
+        								'email'    => $customer->email,
+        								'firstname'=> $customer->firstname,
+        								'lastname' => $customer->lastname,
+        								'id_lang'  => $id_lang);
+        	$result = $this->getSingleMapData($singleMapParams);
+        	if(!is_null($result) && is_array($result))
         	{
-	    	    $data["order_date"] = $order->date_add;
-			    $data["email"] = $customer->email;
-			    $data["customer_name"] = $customer->firstname . ' ' . $customer->lastname;
-			    $data["order_id"] = $params['id_order'];
-			    $data['platform'] = 'prestashop';
-			    $products_arr = array();
+        		$result['platform'] = 'prestashop';
+        		return $result;
+        	}
+        }
+	 	return NULL;
+	}
+
+	private function getSingleMapData($params)
+	{
+		$cart = Cart::getCartByOrderId($params['id_order']);
+		if(Validate::isLoadedObject($cart))
+		{
+			$products = $cart->getProducts();
+       		$currency = Currency::getCurrencyInstance($cart->id_currency);
+       		if(!is_null($products) && is_array($products) && Validate::isLoadedObject($currency))
+       		{
+       			$data = array();
+    	    	$data["order_date"] = $params['date_add'];
+		    	$data["email"] = $params['email'];
+		    	$data["customer_name"] = $params['firstname'] . ' ' . $params['lastname'];
+		    	$data["order_id"] = $params['id_order'];
 			    $data["currency_iso"] = $currency->iso_code;			    
+			    $products_arr = array();
 			    foreach ($products as $product) 
 			    {
 					$product_data = array();    
 					$product_data['url'] = $this->getProductLink($product['id_product']); 
 					$product_data['name'] = $product['name'];
 					$product_data['image'] = $this->getProductImageUrl($product['id_product']);
-					$product_data['description'] = $this->getDescritpion($product, intval($params['cookie']->id_lang));
+					$product_data['description'] = $this->getDescritpion($product, intval($params['id_lang']));
 					$product_data['price'] = $product['price'];
 
 					$products_arr[$product['id_product']] = $product_data;
+<<<<<<< HEAD
 			    }
 			    $data['products'] = $products_arr;
 			    return $data;
@@ -544,5 +611,50 @@ class Yotpo extends Module
         }
 	 	return NULL;
 	}	
+=======
+		    	}
+		    	$data['products'] = $products_arr;
+		    	return $data;
+       		}
+		}
+       	return NULL;
+	}
+	
+	private function getPastOrders()
+	{
+		$accepted_status = join(',',self::getAcceptedMapStatuses());
+		$result = Db::getInstance()->ExecuteS('SELECT  o.`id_order`,o.`id_lang`, o.`date_add`, c.`firstname`, c.`lastname`, c.`email` 
+		FROM `'._DB_PREFIX_.'order_history` oh
+		LEFT JOIN `'._DB_PREFIX_.'orders` o on o.`id_order` = oh.`id_order` 
+		LEFT JOIN `'._DB_PREFIX_.'customer` c on c.`id_customer` = o.`id_customer` 	
+		WHERE oh.`id_order_history` IN (SELECT MAX(`id_order_history`) FROM `'._DB_PREFIX_.'order_history` GROUP BY `id_order`) AND
+		o.`date_add` <  NOW() AND 
+		DATE_SUB(NOW(), INTERVAL '.self::PAST_ORDERS_DAYS_BACK.' day) < o.`date_add` AND 
+		oh.`id_order_state` in ('.$accepted_status.')
+		LIMIT 0,'.self::PAST_ORDERS_LIMIT.'');
+		if(is_array($result))
+		{
+			$orders = array();
+			foreach ($result as $singleMap)
+			{
+				$res = $this->getSingleMapData($singleMap);
+				if(!is_null($res))
+				{
+					$orders[]= $res;
+				}
+			}
+			$post_bulk_orders = array_chunk($orders, self::BULK_SIZE);
+			$data = array();
+			foreach ($post_bulk_orders as $index=>$bulk)
+			{
+				$data[$index] = array();
+				$data[$index]['orders'] = $bulk;
+				$data[$index]['platform'] = 'prestashop';			
+			}			
+			return $data;
+		}
+		return NULL;
+	}		
+>>>>>>> ca402ea... yotpo/httpClient.php
 }
 ?>
