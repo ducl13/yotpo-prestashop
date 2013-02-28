@@ -58,7 +58,7 @@ class YotpoHttpClient
 		if(isset($token))
 		{
 			$data['utoken'] = $token;
-		    $this->makePostRequest(self::YOTPO_API_URL . '/apps/' . $app_key . "/purchases/mass_create", $data);
+		    return $this->makePostRequest(self::YOTPO_API_URL . '/apps/' . $app_key . "/purchases/mass_create", $data);
 		}	
 	}
 

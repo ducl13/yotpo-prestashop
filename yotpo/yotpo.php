@@ -6,6 +6,7 @@ if (!defined('_PS_VERSION_')){
 class Yotpo extends Module
 {
 	const PAST_ORDERS_DAYS_BACK = 30;
+	const PAST_ORDERS_LIMIT = 10;
 	private $_html = '';
 	private $_httpClient = NULL;
 	private $_yotpo_module_path = '';
@@ -439,7 +440,15 @@ class Yotpo extends Module
 			$past_orders = $this->getPastOrders();
 			if(!is_null($past_orders))
 			{
-				$result = $this->httpClient()->makePastOrdersRequest($past_orders, $api_key, $secret_token);
+				$response = $this->httpClient()->makePastOrdersRequest($past_orders, $api_key, $secret_token);
+				if ($response['code'] == 200)
+				{			
+					return $this->prepareSuccess('Past orders sent successfully');
+				}	
+				else 
+				{					
+					return $this->prepareSuccess($this->l($response['message']));
+				}
 			}	
 		}
 	}
@@ -602,7 +611,8 @@ class Yotpo extends Module
 		WHERE oh.`id_order_history` IN (SELECT MAX(`id_order_history`) FROM `'._DB_PREFIX_.'order_history` GROUP BY `id_order`) AND
 		o.`date_add` <  NOW() AND 
 		DATE_SUB(NOW(), INTERVAL '.self::PAST_ORDERS_DAYS_BACK.' day) < o.`date_add` AND 
-		oh.`id_order_state` in ('.$accepted_status.')');
+		oh.`id_order_state` in ('.$accepted_status.')
+		LIMIT 0,'.self::PAST_ORDERS_LIMIT.'');
 		if(is_array($result))
 		{
 			$data = array();
