@@ -88,7 +88,9 @@
         </div>        
       </fieldset>
       <div class="y-footer">
+      {if $showPastOrdersButton}
         <input type="submit" name="yotpo_past_orders" value="{l s='Submit past orders' mod='yotpo'}" class="y-submit-btn">
+      {/if}
         <input type="submit" name="yotpo_settings" value="{l s='Update' mod='yotpo'}" class="y-submit-btn" />
       </div>
     </form>

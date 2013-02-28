@@ -436,7 +436,6 @@ class Yotpo extends Module
 		}
 		elseif(Tools::isSubmit('yotpo_past_orders'))
 		{
-			Configuration::updateValue('yotpo_past_orders', 1, false);
 			$api_key = Tools::getValue('yotpo_app_key');
 			$secret_token = Tools::getValue('yotpo_oauth_token');
 			$past_orders = $this->getPastOrders();
@@ -455,6 +454,7 @@ class Yotpo extends Module
 			}
 			if($is_success)
 			{
+				Configuration::updateValue('yotpo_past_orders', 1, false);
 				$this->prepareSuccess('Past orders sent successfully');
 			}	
 		}
