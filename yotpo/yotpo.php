@@ -576,7 +576,7 @@ class Yotpo extends Module
        		$currency = Currency::getCurrencyInstance($cart->id_currency);
        		if(!is_null($products) && is_array($products) && Validate::isLoadedObject($currency))
        		{
-       			$data = $array();
+       			$data = array();
     	    	$data["order_date"] = $params['date_add'];
 		    	$data["email"] = $params['email'];
 		    	$data["customer_name"] = $params['firstname'] . ' ' . $params['lastname'];
