@@ -6,7 +6,8 @@ if (!defined('_PS_VERSION_')){
 class Yotpo extends Module
 {
 	const PAST_ORDERS_DAYS_BACK = 30;
-	const PAST_ORDERS_LIMIT = 10;
+	const PAST_ORDERS_LIMIT = 10000;
+	const BULK_SIZE = 1000;	
 	private $_html = '';
 	private $_httpClient = NULL;
 	private $_yotpo_module_path = '';
@@ -434,21 +435,26 @@ class Yotpo extends Module
 		}
 		elseif(Tools::isSubmit('yotpo_past_orders'))
 		{
-			//Configuration::updateValue('yotpo_past_orders', 1, false);
+			Configuration::updateValue('yotpo_past_orders', 1, false);
 			$api_key = Tools::getValue('yotpo_app_key');
 			$secret_token = Tools::getValue('yotpo_oauth_token');
 			$past_orders = $this->getPastOrders();
-			if(!is_null($past_orders))
+			$is_success = true;
+			foreach ($past_orders as $post_bulk) 
 			{
-				$response = $this->httpClient()->makePastOrdersRequest($past_orders, $api_key, $secret_token);
-				if ($response['code'] == 200)
-				{			
-					return $this->prepareSuccess('Past orders sent successfully');
-				}	
-				else 
-				{					
-					return $this->prepareSuccess($this->l($response['message']));
+				if(!is_null($post_bulk))
+				{
+					$response = $this->httpClient()->makePastOrdersRequest($post_bulk, $api_key, $secret_token);
+					if ($response['code'] != 200 && $is_success)
+					{
+						$is_success = false;
+						$this->prepareError($this->l($response['message']));
+					}
 				}
+			}
+			if($is_success)
+			{
+				$this->prepareSuccess('Past orders sent successfully');
 			}	
 		}
 	}
@@ -490,8 +496,9 @@ class Yotpo extends Module
         'action' => Tools::safeOutput($_SERVER['REQUEST_URI']),
         'appKey' => Tools::safeOutput(Tools::getValue('yotpo_app_key',Configuration::get('yotpo_app_key'))),
         'oauthToken' => Tools::safeOutput(Tools::getValue('yotpo_oauth_token',Configuration::get('yotpo_oauth_token'))),
-        'widgetLanguage' => Configuration::get('yotpo_language'),
+        'widgetLanguage' => Configuration::get('yotpo_language'),       
         'widgetLocation' => Configuration::get('yotpo_widget_location'),
+		'showPastOrdersButton' => Configuration::get('yotpo_past_orders') != 1 ? true : false,         
         'tabName' => Configuration::get('yotpo_widget_tab_name')));
 
 		$this->_html .= $this->display(__FILE__, 'tpl/settingsForm.tpl');
@@ -615,17 +622,23 @@ class Yotpo extends Module
 		LIMIT 0,'.self::PAST_ORDERS_LIMIT.'');
 		if(is_array($result))
 		{
-			$data = array();
-			$data['orders'] = array(); 
-			$data['platform'] = 'prestashop';
+			$orders = array();
 			foreach ($result as $singleMap)
 			{
 				$res = $this->getSingleMapData($singleMap);
 				if(!is_null($res))
 				{
-					$data['orders'][]= $res;
+					$orders[]= $res;
 				}
 			}
+			$post_bulk_orders = array_chunk($orders, self::BULK_SIZE);
+			$data = array();
+			foreach ($post_bulk_orders as $index=>$bulk)
+			{
+				$data[$index] = array();
+				$data[$index]['orders'] = $bulk;
+				$data[$index]['platform'] = 'prestashop';			
+			}			
 			return $data;
 		}
 		return NULL;
