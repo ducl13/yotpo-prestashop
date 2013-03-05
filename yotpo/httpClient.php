@@ -49,7 +49,7 @@ class YotpoHttpClient
 			$data['account_platform'] = $platform_type;
 			return $this->makePostRequest(self::YOTPO_API_URL . '/apps/' . $app_key .'/account_platform', $data);
 		}
-		return $token;
+		return array('status_message' => 'Could not create account correctly, authorization failed','status_code' => '401');
 	}
 
 	public function makePastOrdersRequest($data, $app_key, $secret_token)
@@ -74,23 +74,19 @@ class YotpoHttpClient
 
 	public function makePostRequest($url, $data)
 	{
-		if (!function_exists('curl_init'))
-			return NULL;	
-
-		$data_string = json_encode($data); 
-		$ch = curl_init($url);                                                                      
+		$ch = curl_init($url);
+		list($is_json, $parsed_data) = YotpoHttpClient::jsonOrUrlEncode($data);    
+		$content_type = $is_json ? 'application/json' : 'application/x-www-form-urlencoded';                                                                                                                         
 		curl_setopt($ch, CURLOPT_CUSTOMREQUEST, "POST");                                                                     
-		curl_setopt($ch, CURLOPT_POSTFIELDS, $data_string);                                                                  
+		curl_setopt($ch, CURLOPT_POSTFIELDS, $parsed_data);                                                                  
 		curl_setopt($ch, CURLOPT_RETURNTRANSFER, true); 
 		curl_setopt($ch, CURLOPT_CONNECTTIMEOUT ,self::HTTP_REQUEST_TIMEOUT);                                                                
 		curl_setopt($ch, CURLOPT_HTTPHEADER, array(                                                                          
-		    'Content-Type: application/json',                                                                                
-		    'Content-Length: ' . strlen($data_string))                                                                       
-		);                                                                                                                   
- 
+		    'Content-Type: ' . $content_type,
+			'Content-length: '.strlen($parsed_data)));                                                                                                                   
 		$result = curl_exec($ch);
 		curl_close ($ch);	
-		return json_decode($result, true);
+		return YotpoHttpClient::jsonDecode($result, true);
 	}
 
 	private function grantOauthAccess($app_key, $secret_token)
@@ -110,10 +106,11 @@ class YotpoHttpClient
 
 	      $response = $result['body'];
 	      
-	      $tokenParams = json_decode($result['body'], true);
+	      $pregResult = preg_match("/access_token[\W]*[\"'](.*?)[\"']/",$response,$matches);
+		  $token = $pregResult == 1 ? $matches[1] : '';
 	     
-	      if(isset($tokenParams['access_token']))
-	      	return $tokenParams['access_token'];
+	      if($token != '')
+	      	return $token;
 	      else
 	      	return NULL;
 		}
@@ -121,6 +118,85 @@ class YotpoHttpClient
 	    {//Do nothing
 	    	return NULL;
 	    }
+	}
+	
+	private static function jsonOrUrlEncode($data)
+	{
+		if(function_exists('json_encode'))
+		{
+			return array(true, json_encode($data));
+		}
+		elseif (method_exists('Tools', 'jsonEncode'))
+		{
+			return array(true, Tools::jsonEncode($data));
+		}
+		else 
+		{
+			return array(false,http_build_query($data));
+		}
+	}
+	
+	private static function jsonDecode($data, $assoc = false)
+	{
+		$result = false;
+		if(function_exists('json_decode'))
+		{
+			$result = array(true,json_decode($data, $assoc));
+		}
+		elseif (method_exists('Tools', 'jsonEncode'))
+		{
+			$result = array(true,Tools::jsonDecode($data, $assoc));
+		}
+		else
+		{
+			$result = array(false);
+		}
+		if($result)
+		{
+			return array('json' => true, 'status_code' => $result[1]['status']['code'], 'status_message' => $result[1]['status']['message'], 'response' => $result[1]['response']);
+		}
+		else
+		{
+			$result = preg_match("/code[\W]*(\d*)/",$data,$matches);
+			$status_code = $result == 1 ? $matches[1] : '';
+			unset($matches,$result);
+			$result = preg_match("/message[\W]*[\"'](.*?)[\"']/",$data,$matches);
+			$status_message = $result == 1 ? $matches[1] : '';
+			unset($matches,$result);
+			$result = preg_match("/response[\W]*({)/",$data,$matches,PREG_OFFSET_CAPTURE);
+			$response = '';
+			if($result == 1 && isset($matches[1][1]))
+			{
+				$response = YotpoHttpClient::getStringBetweenBrackets(substr($data, $matches[1][1]));
+			}
+			return array('json' => false, 'status_code' => $status_code, 'status_message' => $status_message, 'response' => $response);
+		}
+	}	
+
+	private static function getStringBetweenBrackets($data)
+	{
+		$count = 0;
+		if($data[0] != '{')
+		{
+			return '';
+		}
+		for ($position = 0; $position < strlen($data); $position++) {
+			switch ($data[$position])
+			{
+				case  '{' :
+					$count++;
+					break;
+				case  '}' :
+					$count--;
+					break;
+					
+			}
+			if($count == 0)
+			{
+				return substr($data,0,$position);
+			}	
+		}
+		return '';
 	}
 }
 ?>

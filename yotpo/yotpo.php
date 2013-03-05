@@ -5,7 +5,7 @@ if (!defined('_PS_VERSION_')){
 
 class Yotpo extends Module
 {
-	const PAST_ORDERS_DAYS_BACK = 30;
+	const PAST_ORDERS_DAYS_BACK = 90;
 	const PAST_ORDERS_LIMIT = 10000;
 	const BULK_SIZE = 1000;	
 	private $_html = '';
@@ -23,7 +23,7 @@ class Yotpo extends Module
 
 		$this->name = 'yotpo';
 		$this->tab = $version_test ? 'advertising_marketing' : 'Reviews';
-		$this->version = '1.0.9';
+		$this->version = '1.1.0';
 		if($version_test){
 			$this->author = 'Yotpo';
 		}
@@ -93,12 +93,11 @@ class Yotpo extends Module
 
 		foreach ($this->_required_files as $file)
 		{
-			if(!stream_resolve_include_path($this->_yotpo_module_path .$file))
+			if(!file_exists($this->_yotpo_module_path .$file))
 			{
 				$this->setError($this->l('Can\'t include file ' . $this->_yotpo_module_path .$file));
 			}
 		}
-
 
 		if (
 			(is_array($this->_errors) && count($this->_errors) > 0) OR
@@ -373,31 +372,56 @@ class Yotpo extends Module
 			
 			$is_mail_valid = $this->httpClient()->checkeMailAvailability($email);
 
-			if($is_mail_valid['status']['code'] == 200 && $is_mail_valid['response']['available'] == true)
+			if($is_mail_valid['status_code'] == 200 && 
+			  	($is_mail_valid['json'] == true && $is_mail_valid['response']['available'] == true) || 
+			  	($is_mail_valid['json'] == false && preg_match("/available[\W]*(true)/",$is_mail_valid['response']) == 1)
+			  )
 			{
-				$response = $this->httpClient()->register($email, $name, $password, _PS_BASE_URL_);
-				if($response['status']['code'] == 200)
+				$registerResponse = $this->httpClient()->register($email, $name, $password, _PS_BASE_URL_);
+				if($registerResponse['status_code'] == 200)
 				{
-					$accountPlatformResponse = $this->httpClient()->createAcountPlatform($response['response']['app_key'], $response['response']['secret'], _PS_BASE_URL_);
-					if($accountPlatformResponse['status']['code'] == 200)
+					$app_key ='';
+					$secret = '';
+					if($registerResponse['json'] == true)
 					{
-						Configuration::updateValue('yotpo_app_key', $response['response']['app_key'], false);
-						Configuration::updateValue('yotpo_oauth_token', $response['response']['secret'], false);
+						$app_key = $registerResponse['response']['app_key'];
+					}
+					else 
+					{
+						preg_match("/app_key[\W]*[\"'](.*?)[\"']/",$registerResponse['response'],$matches);
+						$app_key = $matches[1];
+						unset($matches);
+					}
+					$secret ='';
+					if($registerResponse['json'] == true)
+					{
+						$secret = $registerResponse['response']['secret'];
+					}
+					else 
+					{
+						preg_match("/secret[\W]*[\"'](.*?)[\"']/",$registerResponse['response'],$matches);
+						$secret = $matches[1];
+					}					
+					$accountPlatformResponse = $this->httpClient()->createAcountPlatform($app_key, $secret, _PS_BASE_URL_);
+					if($accountPlatformResponse['status_code'] == 200)
+					{
+						Configuration::updateValue('yotpo_app_key', $app_key, false);
+						Configuration::updateValue('yotpo_oauth_token', $secret, false);
 						return $this->prepareSuccess($this->l('Account successfully created'));
 					}
 					else
 					{
-						return $this->prepareError($response['status']['message']);	
+						return $this->prepareError($accountPlatformResponse['status_message']);	
 					}
 				}
 				else
 				{
-					return $this->prepareError($response['status']['message']);
+					return $this->prepareError($registerResponse['status_message']);
 				}
 			}
 			else
 			{
-				if($is_mail_valid['status']['code'] == 200 )
+				if($is_mail_valid['status_code'] == 200 )
 				{
 					return $this->prepareError('This mail is allready taken.');	
 				}
@@ -445,10 +469,10 @@ class Yotpo extends Module
 				if(!is_null($post_bulk))
 				{
 					$response = $this->httpClient()->makePastOrdersRequest($post_bulk, $api_key, $secret_token);
-					if ($response['code'] != 200 && $is_success)
+					if ($response['status_code'] != 200 && $is_success)
 					{
 						$is_success = false;
-						$this->prepareError($this->l($response['message']));
+						$this->prepareError($this->l($response['status_message']));
 					}
 				}
 			}
