@@ -462,25 +462,32 @@ class Yotpo extends Module
 		{
 			$api_key = Tools::getValue('yotpo_app_key');
 			$secret_token = Tools::getValue('yotpo_oauth_token');
-			$past_orders = $this->getPastOrders();
-			$is_success = true;
-			foreach ($past_orders as $post_bulk) 
+			if($api_key != '' && $secret_token != '')
 			{
-				if(!is_null($post_bulk))
+				$past_orders = $this->getPastOrders();
+				$is_success = true;
+				foreach ($past_orders as $post_bulk) 
 				{
-					$response = $this->httpClient()->makePastOrdersRequest($post_bulk, $api_key, $secret_token);
-					if ($response['status_code'] != 200 && $is_success)
+					if(!is_null($post_bulk))
 					{
-						$is_success = false;
-						$this->prepareError($this->l($response['status_message']));
+						$response = $this->httpClient()->makePastOrdersRequest($post_bulk, $api_key, $secret_token);
+						if ($response['status_code'] != 200 && $is_success)
+						{
+							$is_success = false;
+							$this->prepareError($this->l($response['status_message']));
+						}
 					}
 				}
+				if($is_success)
+				{
+					Configuration::updateValue('yotpo_past_orders', 1, false);
+					$this->prepareSuccess('Past orders sent successfully');
+				}	
 			}
-			if($is_success)
+			else 
 			{
-				Configuration::updateValue('yotpo_past_orders', 1, false);
-				$this->prepareSuccess('Past orders sent successfully');
-			}	
+				$this->prepareError($this->l('You need to set your app key and secret token to post past orders'));
+			}
 		}
 	}
 
