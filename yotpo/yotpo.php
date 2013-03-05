@@ -180,7 +180,7 @@ class Yotpo extends Module
 	{
 		Configuration::deleteByName('yotpo_app_key');
 		Configuration::deleteByName('yotpo_oauth_token');
-		Configuration::deleteByName('yotpo_map_enabled');
+		Configuration::deleteByName('yotpo_is_installed');
 		Configuration::deleteByName('yotpo_language');
 		Configuration::deleteByName('yotpo_widget_location');
 		Configuration::deleteByName('yotpo_widget_tab_name');
@@ -192,9 +192,9 @@ class Yotpo extends Module
 	// module configuration
 	public function getContent()
 	{
-		if(Configuration::get('yotpo_map_enabled') == NULL)
+		if(Configuration::get('yotpo_is_installed') == NULL)
 		{
-			Configuration::updateValue('yotpo_map_enabled', '1', false);
+			Configuration::updateValue('yotpo_is_installed', '1', false);
 			echo '
         <script type="text/javascript">
         var prefix ="";
@@ -447,7 +447,7 @@ class Yotpo extends Module
 			{
 				return $this->prepareError($this->l('Api key is missing'));	
 			}
-			if($map_enabled && $secret_token == '')
+			if($secret_token == '')
 			{
 				return $this->prepareError($this->l('Please fill out the secret token'));	
 			}
