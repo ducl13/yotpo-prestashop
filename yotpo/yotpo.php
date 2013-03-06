@@ -533,7 +533,21 @@ class Yotpo extends Module
 		'showPastOrdersButton' => Configuration::get('yotpo_past_orders') != 1 ? true : false,         
         'tabName' => Configuration::get('yotpo_widget_tab_name')));
 
-		$this->_html .= $this->display(__FILE__, 'tpl/settingsForm.tpl');
+		$settings_template = $this->display(__FILE__, 'tpl/settingsForm.tpl');
+		if (strpos($settings_template, 'yotpo_map_enabled') != false)
+		{
+			if(method_exists($smarty, 'clearCompiledTemplate'))
+			{
+				$smarty->clearCompiledTemplate(_PS_MODULE_DIR_ . $this->name .'/tpl/settingsForm.tpl');	
+				$settings_template = $this->display(__FILE__, 'tpl/settingsForm.tpl');
+			}
+			elseif (method_exists($smarty, 'clear_compiled_tpl'))
+			{
+				$smarty->clear_compiled_tpl(_PS_MODULE_DIR_ . $this->name .'/tpl/settingsForm.tpl');
+				$settings_template = $this->display(__FILE__, 'tpl/settingsForm.tpl');
+			}
+		}
+		$this->_html .= $settings_template;
 	}
 
 	private function getProductModel($product)
@@ -556,12 +570,22 @@ class Yotpo extends Module
 			return '';	
 		}
 		$result = array();
-		$all_product_subs = Product::getProductCategoriesFull($product->id, $this->context->language->id);
+		$lang_id;
+		if(isset($this->context))
+		{
+			$lang_id = $this->context->language->id; 
+		}
+		else 
+		{
+			global $cookie;
+			$lang_id = $cookie->id_lang; 
+		}
+		$all_product_subs = Product::getProductCategoriesFull($product->id, $lang_id);
 		if(isset($all_product_subs) && count($all_product_subs)>0)
 		{
 			foreach($all_product_subs as $subcat)
 			{
-				$sub_category = new Category($subcat['id_category'], $this->context->language->id);
+				$sub_category = new Category($subcat['id_category'], $lang_id);
 				$sub_category_path = $sub_category->getParentsCategories();
 				foreach ($sub_category_path as $key) {
 					$result[] = $key['name'];
