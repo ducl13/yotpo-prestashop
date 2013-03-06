@@ -536,15 +536,28 @@ class Yotpo extends Module
 		$settings_template = $this->display(__FILE__, 'tpl/settingsForm.tpl');
 		if (strpos($settings_template, 'yotpo_map_enabled') != false)
 		{
-			if(method_exists($smarty, 'clearCompiledTemplate'))
+			try 
 			{
-				$smarty->clearCompiledTemplate(_PS_MODULE_DIR_ . $this->name .'/tpl/settingsForm.tpl');	
-				$settings_template = $this->display(__FILE__, 'tpl/settingsForm.tpl');
+				$smarty->clear_compiled_template('settingsForm.tpl');
+				$settings_template = $this->display(__FILE__, 'tpl/settingsForm.tpl');	
 			}
-			elseif (method_exists($smarty, 'clear_compiled_tpl'))
+			catch (Exception $e)
 			{
-				$smarty->clear_compiled_tpl(_PS_MODULE_DIR_ . $this->name .'/tpl/settingsForm.tpl');
-				$settings_template = $this->display(__FILE__, 'tpl/settingsForm.tpl');
+				try 
+				{
+					$smarty->clear_compiled_tpl(_PS_MODULE_DIR_ . $this->name .'/tpl/settingsForm.tpl');
+					$settings_template = $this->display(__FILE__, 'tpl/settingsForm.tpl');
+				} catch (Exception $e) 
+				{
+					try 
+					{
+						$smarty->clearCompiledTemplate(_PS_MODULE_DIR_ . $this->name .'/tpl/settingsForm.tpl');	
+						$settings_template = $this->display(__FILE__, 'tpl/settingsForm.tpl');								
+					} catch (Exception $e) 
+					{
+					}
+					
+				}
 			}
 		}
 		$this->_html .= $settings_template;
