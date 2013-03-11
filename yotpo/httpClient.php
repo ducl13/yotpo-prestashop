@@ -91,17 +91,17 @@ class YotpoHttpClient
 
 	private function grantOauthAccess($app_key, $secret_token)
 	{
-    	$OAuthStorePath = _PS_MODULE_DIR_ . 'yotpo/lib/oauth-php/library/OAuthStore.php';
-    	$OAuthRequesterPath = _PS_MODULE_DIR_ . 'yotpo/lib/oauth-php/library/OAuthRequester.php';
+    	$OAuthStorePath = _PS_MODULE_DIR_ . 'yotpo/lib/oauth-php/library/YotpoOAuthStore.php';
+    	$OAuthRequesterPath = _PS_MODULE_DIR_ . 'yotpo/lib/oauth-php/library/YotpoOAuthRequester.php';
 		include_once ($OAuthStorePath);
 		include_once ($OAuthRequesterPath);	    		   	
 	    $yotpo_options = array( 'consumer_key' => $app_key, 'consumer_secret' => $secret_token, 'client_id' => $app_key, 'client_secret' => $secret_token, 'grant_type' => 'client_credentials' );
     
-      	OAuthStore::instance("2Leg", $yotpo_options);
+      	YotpoOAuthStore::instance("2Leg", $yotpo_options);
 	    try
 	    {
 
-	      $request = new OAuthRequester(self::YOTPO_OAUTH_TOKEN_URL, "POST", $yotpo_options);         
+	      $request = new YotpoOAuthRequester(self::YOTPO_OAUTH_TOKEN_URL, "POST", $yotpo_options);         
 	      $result = $request->doRequest(0);
 
 	      $response = $result['body'];

@@ -56,17 +56,17 @@
           <div class="y-code">
             {literal}
 
-            &lt;div class=&quot;yotpo reviews&quot; </br>
-               data-appkey=&quot;{$yotpoAppkey}&quot;</br>
-               data-domain=&quot;{$yotpoDomain}&quot;</br>
-               data-product-id=&quot;{$yotpoProductId}&quot;</br>
-               data-product-models=&quot;{$yotpoProductModel}&quot; </br>
-               data-name=&quot;{$yotpoProductName}&quot; </br>
-               data-url=&quot;{$link-&gt;getProductLink($smarty.get.id_product, $smarty.get.id_product.link_rewrite)|escape:&#39;htmlall&#39;:&#39;UTF-8&#39;}&quot; </br>
-               data-image-url=&quot;{$yotpoProductImageUrl}&quot; </br>
-               data-description=&quot;{$yotpoProductDescription}&quot; </br>
-               data-bread-crumbs=&quot;{$yotpoProductBreadCrumbs}&quot;</br>
-               data-lang=&quot;{$yotpoLanguage}&quot;&gt; </br>
+            &lt;div class=&quot;yotpo reviews&quot; <br>
+               data-appkey=&quot;{$yotpoAppkey}&quot;<br>
+               data-domain=&quot;{$yotpoDomain}&quot;<br>
+               data-product-id=&quot;{$yotpoProductId}&quot;<br>
+               data-product-models=&quot;{$yotpoProductModel}&quot; <br>
+               data-name=&quot;{$yotpoProductName}&quot; <br>
+               data-url=&quot;{$link-&gt;getProductLink($smarty.get.id_product, $smarty.get.id_product.link_rewrite)|escape:&#39;htmlall&#39;:&#39;UTF-8&#39;}&quot; <br>
+               data-image-url=&quot;{$yotpoProductImageUrl}&quot; <br>
+               data-description=&quot;{$yotpoProductDescription}&quot; <br>
+               data-bread-crumbs=&quot;{$yotpoProductBreadCrumbs}&quot;<br>
+               data-lang=&quot;{$yotpoLanguage}&quot;&gt; <br>
               &lt;/div&gt;
            {/literal}
          </div>
@@ -85,7 +85,39 @@
         <div class="y-label">{l s='Secret token' mod='yotpo'}</div>
         <div class="y-input">
           <input type="text" name="yotpo_oauth_token" value="{$oauthToken}"/>
-        </div>        
+        </div> 
+        
+        <div class="y-label">{l s='Enable bottom line' mod='yotpo'}
+            <input type="checkbox" name="yotpo_bottom_line_enabled" value="1" {if $bottomLineEnabled}checked="checked"{/if} />
+        </div>  
+        
+        <div class="y-label">{l s='Select bottom Line location' mod='yotpo'}
+          <select name="yotpo_bottom_line_location">
+            <option value="right_column" {if $bottomLineLocation == "right_column"}selected{/if}>Right column</option>
+            <option value="left_column" {if $bottomLineLocation == "left_column"}selected{/if}>Left column</option>
+            <option value="other" {if $bottomLineLocation == "other"}selected{/if}>Other (click update to see instructions)</option>
+          </select>
+        </div>
+        {if $bottomLineLocation == "other"}
+        <div class="y-label">{l s='In order to locate the bottom line in a custom position, please open the "root" folder, then enter the "themes" library. Locate the specific theme you would like the widget to show up on, and in this specific themes folder, locate the file "product.tpl". Add the code here, wherever you would like it placed.' mod='yotpo'}</br> </br> 
+          <div class="y-code">
+            {literal}
+
+            &lt;div class=&quot;yotpo bottomLine&quot; <br>
+               data-appkey=&quot;{$yotpoAppkey}&quot;<br>
+               data-domain=&quot;{$yotpoDomain}&quot;<br>
+               data-product-id=&quot;{$yotpoProductId}&quot;<br>
+               data-product-models=&quot;{$yotpoProductModel}&quot; <br>
+               data-name=&quot;{$yotpoProductName}&quot; <br>
+               data-url=&quot;{$link-&gt;getProductLink($smarty.get.id_product, $smarty.get.id_product.link_rewrite)|escape:&#39;htmlall&#39;:&#39;UTF-8&#39;}&quot; <br>
+               data-image-url=&quot;{$yotpoProductImageUrl}&quot; <br>
+               data-description=&quot;{$yotpoProductDescription}&quot; <br>
+               data-bread-crumbs=&quot;{$yotpoProductBreadCrumbs}&quot;&gt;<br>
+              &lt;/div&gt;
+           {/literal}
+         </div>
+        </div>
+        {/if}               
       </fieldset>
       <div class="y-footer">
       {if $showPastOrdersButton}

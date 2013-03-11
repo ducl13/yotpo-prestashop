@@ -13,7 +13,7 @@ class Yotpo extends Module
 	private $_yotpo_module_path = '';
 	private static $_MAP_STATUS = NULL;
 
-	private $_required_files = array('/httpClient.php', '/lib/oauth-php/library/OAuthStore.php', '/lib/oauth-php/library/OAuthRequester.php'); 
+	private $_required_files = array('/httpClient.php', '/lib/oauth-php/library/YotpoOAuthStore.php', '/lib/oauth-php/library/YotpoOAuthRequester.php'); 
 	
 	public function __construct()
 	{
@@ -23,7 +23,7 @@ class Yotpo extends Module
 
 		$this->name = 'yotpo';
 		$this->tab = $version_test ? 'advertising_marketing' : 'Reviews';
-		$this->version = '1.1.0';
+		$this->version = '1.1.1';
 		if($version_test){
 			$this->author = 'Yotpo';
 		}
@@ -106,6 +106,8 @@ class Yotpo extends Module
 			!$this->registerHook('postUpdateOrderStatus') OR
 			!$this->registerHook('productTab') OR
 			!$this->registerHook('productTabContent') OR
+			!$this->registerHook('extraLeft') OR
+			!$this->registerHook('extraRight') OR			
 			!$this->registerHook('header')) 
 		{
 			return false;
@@ -119,6 +121,12 @@ class Yotpo extends Module
 		// Set default widget tab name.
 		Configuration::updateValue('yotpo_widget_tab_name', 'Reviews', false);
 
+		// Set bottom line enabled by default.
+		Configuration::updateValue('yotpo_bottom_line_enabled', 1, false);
+		
+		// Set default bottom line location.
+		Configuration::updateValue('yotpo_bottom_line_location', 'left_column', false);
+				
 		return true;
 	}
 
@@ -169,11 +177,21 @@ class Yotpo extends Module
 
 	public function hookProductTabContent($params)
 	{
-		$product_id = $this->parseProductId();
-		if($product_id != NULL && Configuration::get('yotpo_widget_location') == 'tab')
+		$product = $this->getPageProduct(null);
+		if($product != NULL && Configuration::get('yotpo_widget_location') == 'tab')
 		{
-			return "<div id='idTab-yotpo'>" . $this->showWidget(new Product((int)($product_id), false, Configuration::get('PS_LANG_DEFAULT'))) . "</div>";
+			return "<div id='idTab-yotpo'>" . $this->showWidget($product) . "</div>";
 		}
+	}
+
+	public function hookextraLeft($params)
+	{
+		return $this->showBottomLine('left_column');	
+	}
+	
+	public function hookextraRight($params)
+	{		
+		return $this->showBottomLine('right_column');	
 	}
 
 	public function uninstall()
@@ -321,15 +339,7 @@ class Yotpo extends Module
 
 	private function showWidget($product)
 	{
-		global $smarty;
-		$smarty->assign('yotpoProductId', $product->id);
-		$smarty->assign('yotpoProductName', strip_tags($product->name));
-		$smarty->assign('yotpoProductDescription', strip_tags($product->description));
-		$smarty->assign('yotpoProductModel', $this->getProductModel($product));
-		$smarty->assign('yotpoProductImageUrl', $this->getProductImageUrl($product->id));
-		$smarty->assign('yotpoProductBreadCrumbs', $this->getBreadCrumbs($product));
-		$smarty->assign('yotpoLanguage', Configuration::get('yotpo_language'));
-
+		$this->assignProductParams($product);
 		if(Configuration::get('yotpo_widget_location') != 'other')
 		{
 			return $this->display(__FILE__,'tpl/widgetDiv.tpl');
@@ -337,6 +347,30 @@ class Yotpo extends Module
 		return NULL;
 	}
 
+	private function assignProductParams($product)
+	{
+		global $smarty;
+		$smarty->assign('yotpoProductId', $product->id);
+		$smarty->assign('yotpoProductName', strip_tags($product->name));
+		$smarty->assign('yotpoProductDescription', strip_tags($product->description));
+		$smarty->assign('yotpoProductModel', $this->getProductModel($product));
+		$smarty->assign('yotpoProductImageUrl', $this->getProductImageUrl($product->id));
+		$smarty->assign('yotpoProductBreadCrumbs', $this->getBreadCrumbs($product));
+	    $smarty->assign('yotpoLanguage', Configuration::get('yotpo_language'));
+	}
+	
+	private function showBottomLine($bottom_line_location)
+	{
+		if(Configuration::get('yotpo_bottom_line_enabled') == true && Configuration::get('yotpo_bottom_line_location') === $bottom_line_location)
+		{
+			if(Configuration::get('yotpo_bottom_line_location') != 'other')
+			{
+				return $this->display(__FILE__,'tpl/bottomLineDiv.tpl');
+			}
+		}
+		return null;
+	}
+		
 	private function getShopDomain()
 	{
 		if(method_exists('Tools', 'getShopDomain')){
@@ -443,6 +477,9 @@ class Yotpo extends Module
 			$language = Tools::getValue('yotpo_language');
 			$location = Tools::getValue('yotpo_widget_location');
 			$tabName = Tools::getValue('yotpo_widget_tab_name');
+			$bottomLineEnabled = Tools::getValue('yotpo_bottom_line_enabled');
+			$bottomLineLocation = Tools::getValue('yotpo_bottom_line_location');
+			
 			if($api_key == '')
 			{
 				return $this->prepareError($this->l('Api key is missing'));	
@@ -456,6 +493,8 @@ class Yotpo extends Module
 			Configuration::updateValue('yotpo_language', $language, false);
 			Configuration::updateValue('yotpo_widget_location', $location, false);
 			Configuration::updateValue('yotpo_widget_tab_name', $tabName, false);
+			Configuration::updateValue('yotpo_bottom_line_enabled', $bottomLineEnabled, false);
+			Configuration::updateValue('yotpo_bottom_line_location', $bottomLineLocation, false);
 			return $this->prepareSuccess();
 		}
 		elseif(Tools::isSubmit('yotpo_past_orders'))
@@ -530,7 +569,9 @@ class Yotpo extends Module
         'oauthToken' => Tools::safeOutput(Tools::getValue('yotpo_oauth_token',Configuration::get('yotpo_oauth_token'))),
         'widgetLanguage' => Configuration::get('yotpo_language'),       
         'widgetLocation' => Configuration::get('yotpo_widget_location'),
-		'showPastOrdersButton' => Configuration::get('yotpo_past_orders') != 1 ? true : false,         
+		'showPastOrdersButton' => Configuration::get('yotpo_past_orders') != 1 ? true : false,  
+		'bottomLineEnabled' => Configuration::get('yotpo_bottom_line_enabled'), 
+		'bottomLineLocation' => Configuration::get('yotpo_bottom_line_location'),      
         'tabName' => Configuration::get('yotpo_widget_tab_name')));
 
 		$settings_template = $this->display(__FILE__, 'tpl/settingsForm.tpl');
@@ -712,6 +753,20 @@ class Yotpo extends Module
 			return $data;
 		}
 		return NULL;
-	}		
+	}	
+
+	private function getPageProduct($product_id = null)
+	{
+		if($product_id == null)
+		{
+			$product_id = $this->parseProductId();
+		}
+		$product = new Product((int)($product_id), false, Configuration::get('PS_LANG_DEFAULT'));
+		if(Validate::isLoadedObject($product))
+		{
+			return $product;
+		}
+		return null;
+	}	
 }
 ?>
