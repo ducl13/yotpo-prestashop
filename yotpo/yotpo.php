@@ -15,6 +15,8 @@ class Yotpo extends Module
 
 	private $_required_files = array('/YotpoHttpClient.php', '/lib/oauth-php/library/YotpoOAuthStore.php', '/lib/oauth-php/library/YotpoOAuthRequester.php'); 
 	
+	private $_is_smarty_product_vars_assigned = false;
+	
 	public function __construct()
 	{
 		$version_mask = explode('.', _PS_VERSION_, 3);
@@ -235,26 +237,39 @@ class Yotpo extends Module
 
 	private function showWidget($product)
 	{
-		global $smarty;
-		$smarty->assign(array('yotpoProductId' => (int)$product->id,
-		'yotpoProductName' => strip_tags($product->name),
-		'yotpoProductDescription' => strip_tags($product->description),
-		'yotpoProductModel' => $this->getProductModel($product),
-		'yotpoProductImageUrl' => $this->getProductImageUrl($product->id),
-		'yotpoProductBreadCrumbs' => $this->getBreadCrumbs($product),
-		'yotpoLanguage' => Configuration::get('yotpo_language')));
-
+		$this->assignProductVars($product);
 		if (Configuration::get('yotpo_widget_location') != 'other')
 			return $this->display(__FILE__, 'tpl/widgetDiv.tpl');
 
 		return null;
 	}
 
+	private function assignProductVars($product = null)
+	{
+		if(!$this->_is_smarty_product_vars_assigned)
+		{
+			if (is_null($product))
+				$product = $this->getPageProduct();
+			$this->_is_smarty_product_vars_assigned = true;
+			global $smarty;
+			$smarty->assign(array('yotpoProductId' => (int)$product->id,
+			'yotpoProductName' => strip_tags($product->name),
+			'yotpoProductDescription' => strip_tags($product->description),
+			'yotpoProductModel' => $this->getProductModel($product),
+			'yotpoProductImageUrl' => $this->getProductImageUrl($product->id),
+			'yotpoProductBreadCrumbs' => $this->getBreadCrumbs($product),
+			'yotpoLanguage' => Configuration::get('yotpo_language')));
+		}
+	}
+	
 	private function showBottomLine($bottom_line_location)
 	{
 		if(Configuration::get('yotpo_bottom_line_enabled') == true && Configuration::get('yotpo_bottom_line_location') === $bottom_line_location
 			&& Configuration::get('yotpo_bottom_line_location') != 'other')
-				return $this->display(__FILE__,'tpl/bottomLineDiv.tpl');
+		{
+			$this->assignProductVars(null);
+			return $this->display(__FILE__,'tpl/bottomLineDiv.tpl');
+		}
 	}
 	
 	private function getShopDomain()
