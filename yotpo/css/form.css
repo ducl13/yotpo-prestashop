@@ -12,6 +12,7 @@
 	padding-bottom: 40px;
 	margin: 0 auto;	
 }
+
 .y-code {
 	font-family: courier,monospace;
 	font-weight: lighter;
@@ -20,6 +21,7 @@
 	font-style: italic;
 	border: 1px solid rgb(206, 206, 206);
 }
+
 .y-settings-title{
 	line-height: 20px;
 	color: #8A8A8A;
@@ -29,11 +31,13 @@
 	padding: 13px 13px 13px 13px;
 	
 }
+
 .y-href {
 	color: #3293D6;
 	text-decoration: underline;
 	font-size: 17px;
 }
+
 .y-wrapper {
 	width: 680px;
 	margin: 0 auto;
@@ -54,9 +58,10 @@
 	padding-bottom: 40px;
 	margin: 0 auto;	
 }
+
 .y-logo {
 	display: block;
-	background: url("../img/spriteSheet.png")	-14px -10px;
+	background: url('../img/spriteSheet.png') -14px -10px;
 	width: 40px;
 	height: 32px;
 	float: left;
@@ -66,6 +71,7 @@
 	width: 36%;
 	float: right;
 }
+
 .y-already-logged-in {
 	color: #3293D6;
 	margin: 0;
@@ -79,17 +85,9 @@
 	line-height: 20px;
 	font-weight: lighter;
 	margin-bottom: 15px;
-	background: url("../img/line.png") repeat-x bottom;
+	background: url('../img/line.png') repeat-x bottom;
 }
-.y-features-list {
-	font-weight: bold;
-}
-.y-header {
-	font-size: 17px;
-}
-.y-footer {
-	padding:20px 30px;
-}
+
 .y-page-header {
 	background: grey;
 	max-height: 50px;
@@ -98,24 +96,21 @@
 	padding: 28px 36px;
 	font-size: 24px;
 }
+
 #y-fieldset {
 	padding: 20px 40px 0 40px;
 	background: white;
 	border: none;
 	max-width: 100%;
 }
+
 .y-label {
 	text-align: left;
 	padding-top: 10px;
 	padding-bottom: 6px;
 	color: #8A8A8A;
 }
-.y-input {
-	width: 100%;
-}
-.y-input input {
-	width: 100%;
-}
+
 .y-submit-btn {
 	margin-left: 5px;
 	padding: 4px 12px;
@@ -136,10 +131,12 @@
 	color: white;
 	float: right;
 }
+
 .y-submit-btn:hover {
 	text-decoration: none;
 	background: #1F6393;
 }
+
 .y-normal-btn {
 	color: #333;
 	text-shadow: 0 1px 1px rgba(255, 255, 255, 0.75);
@@ -160,6 +157,7 @@
 	-moz-box-shadow: inset 0 1px 0 rgba(255, 255, 255, 0.2), 0 1px 2px rgba(0, 0, 0, 0.05);
 	box-shadow: inset 0 1px 0 rgba(255, 255, 255, 0.2), 0 1px 2px rgba(0, 0, 0, 0.05);
 }
+
 .y-normal-btn:hover {
 	color: #333;
 	text-decoration: none;
@@ -173,27 +171,16 @@
     vertical-align: middle;
     width: 28px;
 }
-.conversation-rate {
-    background: url("../img/spriteSheet.png") no-repeat  -189px -48px;
-}
-.multi-languages {
-    background: url("../img/spriteSheet.png") no-repeat  -189px -83px;
-}
-.forever-free {
-    background: url("../img/spriteSheet.png") no-repeat  -189px -119px;
-}
-.social-engagement {
-    background: url("../img/spriteSheet.png") no-repeat  -189px -188px;
-}
-.plug-play {
-    background: url("../img/spriteSheet.png") no-repeat  -189px -222px;
-}
-.full-customization {
-    background: url("../img/spriteSheet.png") no-repeat  -189px -259px;
-}
-.analytics {
-    background: url("../img/spriteSheet.png") no-repeat  -189px -154px;
-}
-.seo {
-    background: url("../img/spriteSheet.png") no-repeat  -189px -293px;
-}
+
+.y-features-list { font-weight: bold; }
+.y-header { font-size: 17px; }
+.y-footer { padding:20px 30px; }
+.y-input, .y-input input { width: 100%; }
+.conversation-rate { background: url('../img/spriteSheet.png') no-repeat  -189px -48px; }
+.multi-languages { background: url('../img/spriteSheet.png') no-repeat  -189px -83px; }
+.forever-free { background: url('../img/spriteSheet.png') no-repeat  -189px -119px; }
+.social-engagement { background: url('../img/spriteSheet.png') no-repeat  -189px -188px; }
+.plug-play { background: url('../img/spriteSheet.png') no-repeat  -189px -222px; }
+.full-customization { background: url('../img/spriteSheet.png') no-repeat  -189px -259px; }
+.analytics { background: url('../img/spriteSheet.png') no-repeat  -189px -154px; }
+.seo { background: url('../img/spriteSheet.png') no-repeat  -189px -293px; }
