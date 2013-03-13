@@ -62,6 +62,8 @@ class YotpoHttpClient
 		curl_setopt($ch, CURLOPT_RETURNTRANSFER, true);
 		curl_setopt($ch, CURLOPT_CONNECTTIMEOUT ,self::HTTP_REQUEST_TIMEOUT);
 		curl_setopt($ch, CURLOPT_HTTPHEADER, array('Content-Type: '.$content_type, 'Content-length: '.strlen($parsed_data)));                                                                                                                   
+		curl_setopt($ch, CURLOPT_SSL_VERIFYHOST, false); /* Added by PrestaShop */
+		curl_setopt($ch, CURLOPT_SSL_VERIFYPEER, false); /* Added by PrestaShop */		
 		$result = curl_exec($ch);
 		curl_close ($ch);	
 		return YotpoHttpClient::jsonDecode($result, true);
@@ -87,6 +89,7 @@ class YotpoHttpClient
 		}
 		catch(YotpoOAuthException2 $e)
 		{
+			d($e);
 			return null;
 		}
 	}
