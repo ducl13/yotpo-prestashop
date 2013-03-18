@@ -45,6 +45,9 @@ Alon:
 1) Add bottom line in product page, and let the shop owner an option to decide where he wants to place it.
 2) Remove usless files in the oauth library, and rename files in this library with Yotpo + file name, to avoid collisions in case some other extension allready loaded these files.
   
-
+2012-03-18
+----
+Alon:
+1) Remove validation of ssl cartificate in yotpo oauth-lib to prevent exceptions in case server cartificates are not updated.
 
 
