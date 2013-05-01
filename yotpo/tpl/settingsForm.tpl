@@ -23,7 +23,7 @@
 
 		<fieldset id="y-fieldset">
       
-	        <div class="y-label">{l s='For multipule-language sites select the widget language automatically, according to the user\'s site language' mod='yotpo'}
+	        <div class="y-label">{l s='For multipule-language sites, mark this check box. This will choose the language according to the user\'s site language' mod='yotpo'}
                <input type="checkbox" name="yotpo_language_as_site" value="1" {if $yotpo_language_as_site}checked="checked"{/if} />
             </div> 
             <div class="y-label">{l s='If you would like to choose a set language, please type the 2-letter language code here. You can find the supported langauge codes ' mod='yotpo'}<a class="y-href" href="http://support.yotpo.com/entries/21861473-Languages-Customization-" target="_blank">{l s='here.' mod='yotpo'}</a></div>
