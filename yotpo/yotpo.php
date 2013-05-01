@@ -23,7 +23,7 @@ class Yotpo extends Module
 		$version_test = $version_mask[0] > 0 && $version_mask[1] > 4;
 		$this->name = 'yotpo';
 		$this->tab = $version_test ? 'advertising_marketing' : 'Reviews';
-		$this->version = '1.2.3';
+		$this->version = '1.2.4';
 		if ($version_test)
 			$this->author = 'Yotpo';
 		$this->need_instance = 1;
@@ -71,22 +71,19 @@ class Yotpo extends Module
 			if(!file_exists($this->_yotpo_module_path .$file))
 				$this->setError($this->l('Can\'t include file '.$this->_yotpo_module_path .$file));
 
-		if ((is_array($this->_errors) && count($this->_errors) > 0) || parent::install() == false 	||
-			!$this->registerHook('productfooter') 	|| !$this->registerHook('postUpdateOrderStatus')||
-			!$this->registerHook('extraLeft') 		|| !$this->registerHook('extraRight') 			||
-			!$this->registerHook('productTab') 		|| !$this->registerHook('productTabContent') 	|| 
-			!$this->registerHook('header')			|| !$this->registerHook('orderConfirmation')) 
+		if ((is_array($this->_errors) && count($this->_errors) > 0) || parent::install() == false ||
+		!$this->registerHook('productfooter') || !$this->registerHook('postUpdateOrderStatus') ||
+		!$this->registerHook('extraLeft') || !$this->registerHook('extraRight') ||
+		!$this->registerHook('productTab') || !$this->registerHook('productTabContent') || !$this->registerHook('header')) 
 			return false;
 
 		/* Default language: English; Default widget location: Product page Footer; Default widget tab name: "Reviews" 
 		 * Default bottom line location: product page left column Default bottom line enabled : true*/
 		Configuration::updateValue('yotpo_language', 'en', false);
-		Configuration::updateValue('yotpo_widget_language_code', 'en', false);
 		Configuration::updateValue('yotpo_widget_location', 'footer', false);
 		Configuration::updateValue('yotpo_widget_tab_name', 'Reviews', false);
 		Configuration::updateValue('yotpo_bottom_line_enabled', 1, false);
 		Configuration::updateValue('yotpo_bottom_line_location', 'left_column', false);
-		Configuration::updateValue('yotpo_language_as_site', 0, false);
 		return true;
 	}
 
@@ -136,35 +133,15 @@ class Yotpo extends Module
 	{		
 		return $this->showBottomLine('right_column');	
 	}
-
-	public function hookorderConfirmation($params)
-	{			
-		$app_key = Configuration::get('yotpo_app_key');
-		$order_id = !empty($params['objOrder']) && !empty($params['objOrder']->id) ? $params['objOrder']->id : null;
-		$order_amount = !empty($params['total_to_pay']) ? $params['total_to_pay'] : '';
-		$order_currency = !empty($params['currencyObj']) && !empty($params['currencyObj']->iso_code) ? $params['currencyObj']->iso_code : '';
 		
-		if(!empty($app_key) && !is_null($order_id)) {
-			global $smarty;
-			$conversion_params = "app_key="			.$app_key.
-								 "&order_id="		.$order_id.
-								 "&order_amount="	.$order_amount.
-								 "&order_currency="	.$order_currency;
-			$conversion_url = "https://api.yotpo.com/conversion_tracking.gif?$conversion_params";
-			$smarty->assign('yotpoConversionUrl', $conversion_url);
-			return $this->display(__FILE__,'tpl/conversionImage.tpl');
-		}	
-	}
-	
 	public function uninstall()
 	{
 		Configuration::deleteByName('yotpo_app_key');
 		Configuration::deleteByName('yotpo_oauth_token');
+		Configuration::deleteByName('yotpo_language');
 		Configuration::deleteByName('yotpo_widget_location');
 		Configuration::deleteByName('yotpo_widget_tab_name');
 		Configuration::deleteByName('yotpo_past_orders');
-		Configuration::deleteByName('yotpo_widget_language_code');
-		Configuration::deleteByName('yotpo_language_as_site');
 
 		return parent::uninstall();
 	}
@@ -180,7 +157,7 @@ class Yotpo extends Module
 		$this->processSettingsForm();
 		$this->displayForm();
 
-		return $this->_html;
+		return '<img src="http://www.prestashop.com/modules/yotpo.png?url_site='.Tools::safeOutput($_SERVER['SERVER_NAME']).'" alt="" style="display: none;" />'.$this->_html;
 	}
 
 	private function getProductImageUrl($id_product)
@@ -274,17 +251,6 @@ class Yotpo extends Module
 			if (is_null($product))
 				$product = $this->getPageProduct();
 			$this->_is_smarty_product_vars_assigned = true;
-			$language = Configuration::get('yotpo_widget_language_code');
-			if (Configuration::get('yotpo_language_as_site') == true) {
-				if (isset($this->context) && isset($this->context->language) && isset($this->context->language->iso_code)) {
-					$language = $this->context->language->iso_code;
-				}
-				else {
-					global $cookie; 
-					$language = Language::getIsoById( (int)$cookie->id_lang );					
-				}
- 					
-			}
 			global $smarty;
 			$smarty->assign(array('yotpoProductId' => (int)$product->id,
 			'yotpoProductName' => strip_tags($product->name),
@@ -292,7 +258,7 @@ class Yotpo extends Module
 			'yotpoProductModel' => $this->getProductModel($product),
 			'yotpoProductImageUrl' => $this->getProductImageUrl($product->id),
 			'yotpoProductBreadCrumbs' => $this->getBreadCrumbs($product),
-			'yotpoLanguage' => $language));
+			'yotpoLanguage' => Configuration::get('yotpo_language')));
 		}
 	}
 	
@@ -380,24 +346,22 @@ class Yotpo extends Module
 		{
 			$api_key = Tools::getValue('yotpo_app_key');
 			$secret_token = Tools::getValue('yotpo_oauth_token');
+			$language = Tools::getValue('yotpo_language');
 			$location = Tools::getValue('yotpo_widget_location');
 			$tabName = Tools::getValue('yotpo_widget_tab_name');
 			$bottomLineEnabled = Tools::getValue('yotpo_bottom_line_enabled');
-			$language_as_site = Tools::getValue('yotpo_language_as_site');
-			$bottomLineLocation = Tools::getValue('yotpo_bottom_line_location');
-			$widget_language_code = Tools::getValue('yotpo_widget_language_code');			
+			$bottomLineLocation = Tools::getValue('yotpo_bottom_line_location');			
 			if ($api_key == '')
 				return $this->prepareError($this->l('Api key is missing'));	
 			if ($secret_token == '')
 				return $this->prepareError($this->l('Please fill out the secret token'));
 			Configuration::updateValue('yotpo_app_key', Tools::getValue('yotpo_app_key'), false);
 			Configuration::updateValue('yotpo_oauth_token', Tools::getValue('yotpo_oauth_token'), false);
+			Configuration::updateValue('yotpo_language', $language, false);
 			Configuration::updateValue('yotpo_widget_location', $location, false);
 			Configuration::updateValue('yotpo_widget_tab_name', $tabName, false);
 			Configuration::updateValue('yotpo_bottom_line_enabled', $bottomLineEnabled, false);
-			Configuration::updateValue('yotpo_bottom_line_location', $bottomLineLocation, false);
-			Configuration::updateValue('yotpo_widget_language_code', $widget_language_code, false);
-			Configuration::updateValue('yotpo_language_as_site', $language_as_site, false);			
+			Configuration::updateValue('yotpo_bottom_line_location', $bottomLineLocation, false);			
 			return $this->prepareSuccess();
 		}
 		elseif (Tools::isSubmit('yotpo_past_orders'))
@@ -465,14 +429,13 @@ class Yotpo extends Module
 		$smarty->assign(array(
 		'yotpo_action' => $_SERVER['REQUEST_URI'],
 		'yotpo_appKey' => Tools::getValue('yotpo_app_key',Configuration::get('yotpo_app_key')),
-		'yotpo_oauthToken' => Tools::getValue('yotpo_oauth_token',Configuration::get('yotpo_oauth_token')),   
+		'yotpo_oauthToken' => Tools::getValue('yotpo_oauth_token',Configuration::get('yotpo_oauth_token')),
+		'yotpo_widgetLanguage' => Configuration::get('yotpo_language'),       
 		'yotpo_widgetLocation' => Configuration::get('yotpo_widget_location'),
 		'yotpo_showPastOrdersButton' => Configuration::get('yotpo_past_orders') != 1 ? true : false,         
 		'yotpo_tabName' => Configuration::get('yotpo_widget_tab_name'),
 		'yotpo_bottomLineEnabled' => Configuration::get('yotpo_bottom_line_enabled'), 
-		'yotpo_bottomLineLocation' => Configuration::get('yotpo_bottom_line_location'),
-		'yotpo_widget_language_code' => Configuration::get('yotpo_widget_language_code'),
-		'yotpo_language_as_site' => Configuration::get('yotpo_language_as_site')));
+		'yotpo_bottomLineLocation' => Configuration::get('yotpo_bottom_line_location')));
 
 		$settings_template = $this->display(__FILE__, 'tpl/settingsForm.tpl');
 		if (strpos($settings_template, 'yotpo_map_enabled') != false)
