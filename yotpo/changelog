@@ -37,3 +37,9 @@
 2012-03-18
 ----
 1) Remove validation of ssl cartificate in yotpo oauth-lib to prevent exceptions in case server cartificates are not updated.
+
+2012-05-01
+----
+Alon Braitstein:
+1) Add check box to the settings screen which choose the widget language accourding to the current shopper language.
+2) Remove the select box for the languages selection and put text field insted which will hold the language code.
