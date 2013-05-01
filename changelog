@@ -57,3 +57,9 @@ Alon Braitstein:
 2) Remove the select box for the languages selection and put text field insted which will hold the language code.
 3) Add conversion image in order confirmation page -- This one is currently working only for versions 1.4 and above (for the Paypal module payment). 
 
+2012-05-01
+----
+Alon Braitstein:
+1) Change some texts
+2) Enforce code language to be lowercase
+3) Delete smarty cache for the settingsTemplate file - file has changed. 

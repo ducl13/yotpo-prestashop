@@ -79,7 +79,8 @@ class Yotpo extends Module
 			return false;
 
 		/* Default language: English; Default widget location: Product page Footer; Default widget tab name: "Reviews" 
-		 * Default bottom line location: product page left column Default bottom line enabled : true*/
+		 * Default bottom line location: product page left column Default bottom line enabled : true*/	
+		
 		Configuration::updateValue('yotpo_language', 'en', false);
 		Configuration::updateValue('yotpo_widget_location', 'footer', false);
 		Configuration::updateValue('yotpo_widget_tab_name', 'Reviews', false);
@@ -163,7 +164,7 @@ class Yotpo extends Module
 		Configuration::deleteByName('yotpo_widget_location');
 		Configuration::deleteByName('yotpo_widget_tab_name');
 		Configuration::deleteByName('yotpo_past_orders');
-	    Configuration::deleteByName('yotpo_widget_language_code');
+	    Configuration::deleteByName('yotpo_language');
     	Configuration::deleteByName('yotpo_language_as_site');
     	
 		return parent::uninstall();
@@ -274,7 +275,7 @@ class Yotpo extends Module
 			if (is_null($product))
 			$product = $this->getPageProduct();
 			$this->_is_smarty_product_vars_assigned = true;
-			$language = Configuration::get('yotpo_widget_language_code');
+			$language = Configuration::get('yotpo_language');
 			if (Configuration::get('yotpo_language_as_site') == true) {
 				if (isset($this->context) && isset($this->context->language) && isset($this->context->language->iso_code)) {
 					$language = $this->context->language->iso_code;
@@ -396,7 +397,7 @@ class Yotpo extends Module
 			Configuration::updateValue('yotpo_widget_tab_name', $tabName, false);
 			Configuration::updateValue('yotpo_bottom_line_enabled', $bottomLineEnabled, false);
 			Configuration::updateValue('yotpo_bottom_line_location', $bottomLineLocation, false);	
-	        Configuration::updateValue('yotpo_widget_language_code', $widget_language_code, false);
+	        Configuration::updateValue('yotpo_language', $widget_language_code, false);
             Configuration::updateValue('yotpo_language_as_site', $language_as_site, false); 		
 			return $this->prepareSuccess();
 		}
@@ -471,11 +472,11 @@ class Yotpo extends Module
 		'yotpo_tabName' => Configuration::get('yotpo_widget_tab_name'),
 		'yotpo_bottomLineEnabled' => Configuration::get('yotpo_bottom_line_enabled'), 
 		'yotpo_bottomLineLocation' => Configuration::get('yotpo_bottom_line_location'),
-	    'yotpo_widget_language_code' => Configuration::get('yotpo_widget_language_code'),
+	    'yotpo_widget_language_code' => Configuration::get('yotpo_language'),
 	    'yotpo_language_as_site' => Configuration::get('yotpo_language_as_site')));
 
 		$settings_template = $this->display(__FILE__, 'tpl/settingsForm.tpl');
-		if (strpos($settings_template, 'yotpo_map_enabled') != false)
+		if (strpos($settings_template, 'yotpo_map_enabled') != false || strpos($settings_template, 'yotpo_language_as_site') == false)
 		{
 			if(method_exists($smarty, 'clearCompiledTemplate'))
 			{
