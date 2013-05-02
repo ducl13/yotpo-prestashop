@@ -63,3 +63,8 @@ Alon Braitstein:
 1) Change some texts
 2) Enforce code language to be lowercase
 3) Delete smarty cache for the settingsTemplate file - file has changed. 
+
+2012-05-02
+----
+Alon Braitstein:
+1) Cahche bug, settings page wasn't updated after upgrading, This happend only in some versions. 

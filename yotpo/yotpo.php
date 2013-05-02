@@ -488,6 +488,12 @@ class Yotpo extends Module
 				$smarty->clear_compiled_tpl(_PS_MODULE_DIR_ . $this->name .'/tpl/settingsForm.tpl');
 				$settings_template = $this->display(__FILE__, 'tpl/settingsForm.tpl');
 			}
+			elseif (isset($smarty->force_compile)) {
+				$value = $smarty->force_compile;
+				$smarty->force_compile = true;
+				$settings_template = $this->display(__FILE__, 'tpl/settingsForm.tpl');
+				$smarty->force_compile = $value;
+			}
 		}
 		$this->_html .= $settings_template;
 	}
