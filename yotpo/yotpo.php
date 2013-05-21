@@ -572,6 +572,11 @@ class Yotpo extends Module
 		if(Validate::isLoadedObject($cart))
 		{
 			$products = $cart->getProducts();
+			if(count($products) == 0 && method_exists('Shop','getContextShopID') && Shop::getContextShopID() != (int)$cart->id_shop) 
+			{
+				Shop::initialize();
+				$products = $cart->getProducts(true);
+			}					
 			$currency = Currency::getCurrencyInstance((int)$cart->id_currency);
 			if (!is_null($products) && is_array($products) && Validate::isLoadedObject($currency))
 			{
