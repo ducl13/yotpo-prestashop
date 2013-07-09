@@ -23,7 +23,7 @@ class Yotpo extends Module
 		$version_test = $version_mask[0] > 0 && $version_mask[1] > 4;
 		$this->name = 'yotpo';
 		$this->tab = $version_test ? 'advertising_marketing' : 'Reviews';
-		$this->version = '1.2.6';
+		$this->version = '1.2.7';
 		if ($version_test)
 			$this->author = 'Yotpo';
 		$this->need_instance = 1;
@@ -94,7 +94,9 @@ class Yotpo extends Module
 	public function hookheader($params)
 	{
 		global $smarty;
-		$smarty->assign(array('yotpoAppkey' => Configuration::get('yotpo_app_key'), 'yotpoDomain' => $this->getShopDomain()));
+		$smarty->assign(array('yotpoAppkey' => Configuration::get('yotpo_app_key'), 
+							  'yotpoDomain' => $this->getShopDomain(),
+							  'yotpoLanguage' => $this->getLanguage()));
 		return '<script src="https://www.yotpo.com/js/yQuery.js"></script>';
 	}
 
@@ -275,17 +277,7 @@ class Yotpo extends Module
 			if (is_null($product))
 			$product = $this->getPageProduct();
 			$this->_is_smarty_product_vars_assigned = true;
-			$language = Configuration::get('yotpo_language');
-			if (Configuration::get('yotpo_language_as_site') == true) {
-				if (isset($this->context) && isset($this->context->language) && isset($this->context->language->iso_code)) {
-					$language = $this->context->language->iso_code;
-				}
-				else {
-					global $cookie;
-					$language = Language::getIsoById( (int)$cookie->id_lang );
-				}
 
-			}
 			global $smarty;
 			$smarty->assign(array('yotpoProductId' => (int)$product->id,
 			'yotpoProductName' => strip_tags($product->name),
@@ -293,7 +285,7 @@ class Yotpo extends Module
 			'yotpoProductModel' => $this->getProductModel($product),
 			'yotpoProductImageUrl' => $this->getProductImageUrl($product->id),
 			'yotpoProductBreadCrumbs' => $this->getBreadCrumbs($product),
-			'yotpoLanguage' => $language));
+			'yotpoLanguage' => $this->getLanguage()));
 		}
 	}
 	
@@ -648,5 +640,19 @@ class Yotpo extends Module
 			return $product;
 			
 		return null;
+	}
+	
+	private function getLanguage() {
+		$language = Configuration::get('yotpo_language');
+		if (Configuration::get('yotpo_language_as_site') == true) {
+			if (isset($this->context) && isset($this->context->language) && isset($this->context->language->iso_code)) {
+				$language = $this->context->language->iso_code;
+			}
+			else {
+				global $cookie;
+				$language = Language::getIsoById( (int)$cookie->id_lang );
+			}	
+		}
+		return $language;
 	}
 }

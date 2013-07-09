@@ -77,4 +77,9 @@ Alon Braitstein:
 2012-05-21
 ----
 Alon Braitstein:
-1) Bug fix, in prestashop 1.5.0.1 (could be in other version as well), the MAP and past orders came without products. This was caused because the built in system cart->getProducts was assignning wrong shop id 
+1) Bug fix, in prestashop 1.5.0.1 (could be in other version as well), the MAP and past orders came without products. This was caused because the built in system cart->getProducts was assignning wrong shop id
+
+2012-07-09
+----
+Alon Braitstein:
+1) Add language support to custome testimonials tab. 
