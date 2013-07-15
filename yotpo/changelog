@@ -44,4 +44,8 @@
 
 2012-05-02
 ----
-1) Cache bug, settings page wasn't updated after upgrading, This happens only in some versions. 
+1) Cache bug, settings page wasn't updated after upgrading, This happens only in some versions.
+
+2012-07-15
+----
+1) Add support in rich snippets.  
