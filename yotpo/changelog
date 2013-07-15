@@ -48,4 +48,8 @@
 
 2012-07-15
 ----
-1) Add support in rich snippets.  
+1) Add support in rich snippets.
+
+2012-07-15
+----
+1) Add update cache method and update row in case it's invalid.    

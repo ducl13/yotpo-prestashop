@@ -12,7 +12,6 @@ class Yotpo extends Module
 	private $_httpClient = null;
 	private $_yotpo_module_path = '';
 	private static $_MAP_STATUS = null;
-	private $_snippet_cache_included = null;
 
 	private $_required_files = array('/YotpoHttpClient.php', '/lib/oauth-php/library/YotpoOAuthStore.php', '/lib/oauth-php/library/YotpoOAuthRequester.php', '/YotpoSnippetCache.php'); 
 	
@@ -39,7 +38,10 @@ class Yotpo extends Module
 			$this->warning = $this->l('Set your API key in order the Yotpo module to work correctly');	
 
 		if (!defined('_PS_BASE_URL_'))
-			define('_PS_BASE_URL_', 'http://'.(isset($_SERVER['HTTP_X_FORWARDED_HOST']) ? $_SERVER['HTTP_X_FORWARDED_HOST'] : $_SERVER['HTTP_HOST']));				
+			define('_PS_BASE_URL_', 'http://'.(isset($_SERVER['HTTP_X_FORWARDED_HOST']) ? $_SERVER['HTTP_X_FORWARDED_HOST'] : $_SERVER['HTTP_HOST']));
+		if(file_exists($this->_yotpo_module_path . '/YotpoSnippetCache.php')) {
+			include_once($this->_yotpo_module_path.'/YotpoSnippetCache.php');	
+		}			
 	}
 
 	public static function getAcceptedMapStatuses()
@@ -674,12 +676,10 @@ class Yotpo extends Module
 	private function getRichSnippet($product_id) {		
 		if (Configuration::get('yotpo_app_key') != '' && Configuration::get('yotpo_oauth_token') != '' && is_int($product_id)) {
 			try {
-				if(is_null($this->_snippet_cache_included)) {
-					include_once($this->_yotpo_module_path.'/YotpoSnippetCache.php');
-					$this->_snippet_cache_included = true;
-				}
-				$result = YotpoSnippetCache::getRichSnippet($product_id);			
-				if($result == false) {			
+
+				$result = YotpoSnippetCache::getRichSnippet($product_id);
+				$should_update_row = is_array($result) && !YotpoSnippetCache::isValidCache($result); 			
+				if($result == false || $should_update_row) {			
 					$result = '';
 					$expiration_time = null;
 					$request_result = $this->httpClient()->makeRichSnippetRequest(Configuration::get('yotpo_app_key'), Configuration::get('yotpo_oauth_token'),$product_id);
@@ -701,9 +701,18 @@ class Yotpo extends Module
 							unset($matches);
 						}	
 						if(strlen($result) > 0 && strlen($expiration_time) > 0 && is_numeric($expiration_time)) {
-							YotpoSnippetCache::addRichSnippetToCahce($product_id, $result, $expiration_time);	
+							if($should_update_row) {
+								YotpoSnippetCache::updateCahce($product_id, $result, $expiration_time);
+							}
+							else {
+								YotpoSnippetCache::addRichSnippetToCahce($product_id, $result, $expiration_time);	
+							}
+								
 						}
 					}
+				}
+				elseif (is_array($result) && !$should_update_row) {
+					$result = $result['rich_snippet_code'];
 				}
 			}
 			catch (Exception $e) {
