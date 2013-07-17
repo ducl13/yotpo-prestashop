@@ -82,4 +82,9 @@ Alon Braitstein:
 2012-07-09
 ----
 Alon Braitstein:
-1) Add language support to custome testimonials tab. 
+1) Add language support to custome testimonials tab.
+
+2012-07-17
+----
+Alon Braitstein:
+1) Disable submit past orders button in case there are no app key or secret token.  

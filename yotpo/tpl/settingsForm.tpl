@@ -104,7 +104,7 @@
 		</fieldset>
 
 		<div class="y-footer">
-			{if $yotpo_showPastOrdersButton}<input type="submit" name="yotpo_past_orders" value="{l s='Submit past orders' mod='yotpo'}" class="y-submit-btn">{/if}
+			{if $yotpo_showPastOrdersButton}<input type="submit" name="yotpo_past_orders" value="{l s='Submit past orders' mod='yotpo'}" class="y-submit-btn" {if empty($yotpo_appKey) || empty($yotpo_oauthToken)} disabled {/if}>{/if}
 			<input type="submit" name="yotpo_settings" value="{l s='Update' mod='yotpo'}" class="y-submit-btn" />
 		</div>
 	</form>
