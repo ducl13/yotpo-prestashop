@@ -55,7 +55,7 @@ class YotpoHttpClient
 	
 	public function makeRichSnippetRequest($app_key, $secret_token, $product_sku)
 	{
-	    return $this->makeGetRequest(self::YOTPO_API_URL_NO_SSL.'/products/'.$app_key.'/'.$product_sku.'/richsnippet', array(), 2);
+	    return $this->makeGetRequest(self::YOTPO_API_URL_NO_SSL.'/products/'.$app_key.'/richsnippet/'.$product_sku, array(), 2);
 	}
 	
 	public function makePostRequest($url, $data, $timeout = self::HTTP_REQUEST_TIMEOUT, $use_https = true)
