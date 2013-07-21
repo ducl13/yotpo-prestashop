@@ -93,6 +93,7 @@ class Yotpo extends Module
 		Configuration::updateValue('yotpo_language_as_site', 0, false);
 		Configuration::updateValue('yotpo_rich_snippets', 1, false);
 		
+		Configuration::updateValue('yotpo_rich_snippet_cache_created', 1, true);
 		return true;
 	}
 
@@ -174,6 +175,8 @@ class Yotpo extends Module
 	    Configuration::deleteByName('yotpo_language');
     	Configuration::deleteByName('yotpo_language_as_site');
     	Configuration::deleteByName('yotpo_rich_snippets');
+    	Configuration::deleteByName('yotpo_rich_snippet_cache_created');
+    	
     	YotpoSnippetCache::dropDB();    	
 		return parent::uninstall();
 	}
@@ -469,6 +472,10 @@ class Yotpo extends Module
 
 	private function displaySettingsForm()
 	{
+		if(!Configuration::get('yotpo_rich_snippet_cache_created')) {
+			$created = YotpoSnippetCache::createDB();
+			Configuration::updateValue('yotpo_rich_snippet_cache_created', 1, $created);
+		}
 		global $smarty;
 	
 		$smarty->assign(array(

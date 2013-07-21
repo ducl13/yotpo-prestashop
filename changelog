@@ -88,3 +88,8 @@ Alon Braitstein:
 ----
 Alon Braitstein:
 1) Disable submit past orders button in case there are no app key or secret token.  
+
+2012-07-21
+----
+Alon Braitstein:
+1) Add variable to db to check wethear the snippet cache was allready created. this is usfull when a user upgrade from an older version  
