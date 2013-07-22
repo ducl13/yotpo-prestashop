@@ -82,7 +82,7 @@ Alon Braitstein:
 2012-07-09
 ----
 Alon Braitstein:
-1) Add language support to custome testimonials tab.
+1) Add language support to custom testimonials tab.
 
 2012-07-09
 ----
@@ -97,4 +97,4 @@ Alon Braitstein:
 2012-07-21
 ----
 Alon Braitstein:
-1) Add variable to db to check wethear the snippet cache was allready created. this is usfull when a user upgrade from an older version  
+1) Add variable to db to check whether the snippet cache was already created. this is useful when a user upgrade from an older version  
