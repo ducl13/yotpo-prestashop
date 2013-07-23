@@ -58,7 +58,7 @@ class YotpoHttpClient
 	    return $this->makeGetRequest(self::YOTPO_API_URL_NO_SSL.'/products/'.$app_key.'/richsnippet/'.$product_sku, array(), 2);
 	}
 	
-	public function makePostRequest($url, $data, $timeout = self::HTTP_REQUEST_TIMEOUT, $use_https = true)
+	public function makePostRequest($url, $data, $timeout = self::HTTP_REQUEST_TIMEOUT, $parse_result = true)
 	{		
 		$ch = curl_init($url);
 		list($is_json, $parsed_data) = YotpoHttpClient::jsonOrUrlEncode($data);    
@@ -72,7 +72,13 @@ class YotpoHttpClient
 		curl_setopt($ch, CURLOPT_SSL_VERIFYPEER, false); /* Added by PrestaShop */		
 		$result = curl_exec($ch);
 		curl_close ($ch);	
-		return YotpoHttpClient::jsonDecode($result, true);
+		if($parse_result) {
+			return YotpoHttpClient::jsonDecode($result, true);	
+		}
+		else {
+			return $result;
+		}
+		
 	}
 
 	private function makeGetRequest($url, $data = array(), $timeout = self::HTTP_REQUEST_TIMEOUT)
@@ -92,26 +98,20 @@ class YotpoHttpClient
 	
 	private function grantOauthAccess($app_key, $secret_token)
 	{
-		include_once(_PS_MODULE_DIR_.'yotpo/lib/oauth-php/library/YotpoOAuthStore.php');
-		include_once(_PS_MODULE_DIR_.'yotpo/lib/oauth-php/library/YotpoOAuthRequester.php');
-
-		$yotpo_options = array('consumer_key' => $app_key, 'consumer_secret' => $secret_token,
-		'client_id' => $app_key, 'client_secret' => $secret_token, 'grant_type' => 'client_credentials');
-    
-		YotpoOAuthStore::instance('2Leg', $yotpo_options);
-		try
-		{
-			$request = new YotpoOAuthRequester(self::YOTPO_OAUTH_TOKEN_URL, 'POST', $yotpo_options);         
-			$result = $request->doRequest(0);
-			$pregResult = preg_match("/access_token[\W]*[\"'](.*?)[\"']/", $result['body'], $matches);
-			$token = $pregResult == 1 ? $matches[1] : '';
-
-			return $token != '' ? $token : null;
+		$yotpo_options = array('client_id' => $app_key, 'client_secret' => $secret_token, 'grant_type' => 'client_credentials');
+		$result = $this->makePostRequest(self::YOTPO_OAUTH_TOKEN_URL, $yotpo_options, self::HTTP_REQUEST_TIMEOUT, false);				
+		if (function_exists('json_decode')) {
+			$result = json_decode($result, false);
+			return $result->access_token;						
 		}
-		catch(YotpoOAuthException2 $e)
-		{
-			d($e);
-			return null;
+		elseif (method_exists('Tools', 'jsonEncode')) {
+			$result = Tools::jsonDecode($result, false);
+			return $result->access_token;
+		}
+		else {
+			$pregResult = preg_match("/access_token[\W]*[\"'](.*?)[\"']/", $result, $matches);
+			$token = $pregResult == 1 ? $matches[1] : '';
+			return $token != '' ? $token : null;	
 		}
 	}
 	

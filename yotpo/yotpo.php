@@ -13,7 +13,7 @@ class Yotpo extends Module
 	private $_yotpo_module_path = '';
 	private static $_MAP_STATUS = null;
 
-	private $_required_files = array('/YotpoHttpClient.php', '/lib/oauth-php/library/YotpoOAuthStore.php', '/lib/oauth-php/library/YotpoOAuthRequester.php', '/YotpoSnippetCache.php'); 
+	private $_required_files = array('/YotpoHttpClient.php', '/YotpoSnippetCache.php'); 
 	
 	private $_is_smarty_product_vars_assigned = false;
 	
@@ -23,7 +23,7 @@ class Yotpo extends Module
 		$version_test = $version_mask[0] > 0 && $version_mask[1] > 4;
 		$this->name = 'yotpo';
 		$this->tab = $version_test ? 'advertising_marketing' : 'Reviews';
-		$this->version = '1.2.8';
+		$this->version = '1.2.9';
 		if ($version_test)
 			$this->author = 'Yotpo';
 		$this->need_instance = 1;

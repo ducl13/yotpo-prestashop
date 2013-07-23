@@ -98,3 +98,8 @@ Alon Braitstein:
 ----
 Alon Braitstein:
 1) Add variable to db to check whether the snippet cache was already created. this is useful when a user upgrade from an older version  
+
+2012-07-21
+----
+Alon Braitstein:
+1) Remove the use of the Oauth library. there is no need to use it.
