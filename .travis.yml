@@ -14,13 +14,13 @@ addons:
 before_script:
 - which php
 - wget -O prestashop.tar.gz "https://codeload.github.com/PrestaShop/PrestaShop/tar.gz/${PRESTA_SHOP_VERSION}"
-- mkdir presta
-- tar xzf prestashop.tar.gz -C presta
+- tar xzf prestashop.tar.gz
+- mv PrestaShop* presta
 - sudo apt-get update
 - sudo apt-get install apache2 s3cmd
 - sudo a2enmod actions
 - sudo a2enmod rewrite
-- echo "export PATH=/home/vagrant/.phpenv/bin:$PATH" | sudo tee -a /etc/apache2/envvars
+- echo "export PATH=/home/travis/.phpenv/shims/:$PATH" | sudo tee -a /etc/apache2/envvars
   > /dev/null
 - echo "$(curl -fsSL https://raw.github.com/gist/16d751c979fdeb5a14e3/gistfile1.txt)"
   | sudo tee /etc/apache2/conf.d/phpconfig > /dev/null
