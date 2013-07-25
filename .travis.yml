@@ -16,7 +16,7 @@ before_script:
 - wget -O prestashop.zip "https://prestashop.googlecode.com/files/prestashop_${PRESTA_SHOP_VERSION}.zip"
 - sudo apt-get update
 - sudo apt-get install apache2 s3cmd unzip -y
-- unzip prestashop.tar.gz
+- unzip prestashop.zip
 - sudo a2enmod actions
 - sudo a2enmod rewrite
 - echo "export PATH=/home/travis/.phpenv/shims/:$PATH" | sudo tee -a /etc/apache2/envvars
