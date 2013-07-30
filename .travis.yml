@@ -1,0 +1,39 @@
+language: php
+services:
+- mysql
+php:
+- 5.5
+env:
+  matrix:
+  - PRESTA_SHOP_VERSION=1.5.0.1
+  global:
+    secure: YY9IqkJ1lVqFqKzOlN5lYLP8WMDjQiSX4cRoMHIWN10sr8KMi2yx5EIA/L/JIZRpR1Zq7iLv0HRsg/OOqY42eiE3DwJ57wjsf9qNtU40hIpMJHo0cA/2fkLUSaH4fye85XN3pMeHQFKX6+e1Tru73MmZ5moEApZ9EtItStcmttw=
+addons:
+  hosts:
+  - www.yotpo-prestashop-test.com
+before_script:
+- which php
+- wget -O prestashop.zip "https://prestashop.googlecode.com/files/prestashop_${PRESTA_SHOP_VERSION}.zip"
+- sudo apt-get update
+- sudo apt-get install apache2 s3cmd unzip -y
+- unzip prestashop.zip
+- sudo a2enmod actions
+- sudo a2enmod rewrite
+- echo "export PATH=/home/travis/.phpenv/shims/:$PATH" | sudo tee -a /etc/apache2/envvars
+  > /dev/null
+- echo "$(curl -fsSL https://raw.github.com/gist/16d751c979fdeb5a14e3/gistfile1.txt)"
+  | sudo tee /etc/apache2/conf.d/phpconfig > /dev/null
+- echo "$(curl -fsSL https://raw.github.com/gist/2eb301570ed4a1f4c33d/gistfile1.txt)"
+  | sed -e "s,PATH,`pwd`/prestashop,g" | sudo tee /etc/apache2/sites-available/default
+  > /dev/null
+- sudo service apache2 restart
+- echo "USE mysql;\nUPDATE user SET password=PASSWORD('root') WHERE user='root';\nFLUSH
+  PRIVILEGES;\n" | mysql -u root
+- mkdir test_output
+- printf "[default]\naccess_key = %s\nsecret_key = %s\n" $AWS_S3_KEY $AWS_S3_SECRET
+  > ~/.s3cfg
+script:
+- phantomjs autotest.js
+after_script:
+- tar czf test_output.$(date +"%Y-%m-%d_%H-%M-%S").tar.gz test_output
+- s3cmd put test_output.*.tar.gz s3://yotpo-travis-builds/presta_plugin/
