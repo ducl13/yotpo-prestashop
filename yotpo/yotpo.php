@@ -214,14 +214,20 @@ class Yotpo extends Module
 			return _PS_BASE_URL_._THEME_PROD_DIR_.(int)$image->id_product.'-'.(int)$image->id.'.'.'jpg';	
 	}
 
-	private function getProductLink($product_id)
+	private function getProductLink($product_id, $link_rewrite = null)
 	{
+		if($link_rewrite == null && method_exists('Product','getUrlRewriteInformations')) {
+			$rewrite_info = Product::getUrlRewriteInformations($product_id);
+			$link_rewrite = $rewrite_info['link_rewrite'];	
+			$rewrite_info['category_rewrite'];
+		}
+		
 		if (isset($this->context) && isset($this->context->link) && method_exists($this->context->link, 'getProductLink'))
-			return $this->context->link->getProductLink((int)$product_id);
+			return $this->context->link->getProductLink((int)$product_id, $link_rewrite);
 
 		global $link;
 		if (isset($link) && method_exists($link, 'getProductLink'))
-			return $link->getProductLink((int)$product_id);
+			return $link->getProductLink((int)$product_id, $link_rewrite);
 		else
 		{
 			$full_product = new Product((int)$product_id, false);
@@ -301,6 +307,7 @@ class Yotpo extends Module
 			'yotpoProductModel' => $this->getProductModel($product),
 			'yotpoProductImageUrl' => $this->getProductImageUrl($product->id),
 			'yotpoProductBreadCrumbs' => $this->getBreadCrumbs($product),
+			'yotpoProductLink' => $this->getProductLink((int)$product->id, $product->link_rewrite),
 			'yotpoLanguage' => $this->getLanguage()));
 		}
 	}
@@ -606,7 +613,7 @@ class Yotpo extends Module
 				foreach ($products as $product) 
 				{
 					$product_data = array();    
-					$product_data['url'] = $this->getProductLink($product['id_product']); 
+					$product_data['url'] = $this->getProductLink($product['id_product'], $product['link_rewrite']); 
 					$product_data['name'] = $product['name'];
 					$product_data['image'] = $this->getProductImageUrl((int)$product['id_product']);
 					$product_data['description'] = $this->getDescritpion($product, (int)$params['id_lang']);

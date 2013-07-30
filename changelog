@@ -103,3 +103,8 @@ Alon Braitstein:
 ----
 Alon Braitstein:
 1) Remove the use of the Oauth library. there is no need to use it.
+
+2012-07-30
+----
+Alon Braitstein:
+1) Change the way we take prodcut url's for MAP and the widget, take it as the rewrite url if enabled.
