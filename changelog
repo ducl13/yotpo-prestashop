@@ -108,3 +108,8 @@ Alon Braitstein:
 ----
 Alon Braitstein:
 1) Change the way we take prodcut url's for MAP and the widget, take it as the rewrite url if enabled.
+
+2012-08-08
+----
+Alon Braitstein:
+1) Increase language code to 5 letters code. 
