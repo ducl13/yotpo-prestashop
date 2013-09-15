@@ -23,7 +23,7 @@ class Yotpo extends Module
 		$version_test = $version_mask[0] > 0 && $version_mask[1] > 4;
 		$this->name = 'yotpo';
 		$this->tab = $version_test ? 'advertising_marketing' : 'Reviews';
-		$this->version = '1.2.9';
+		$this->version = '1.3.0';
 		if ($version_test)
 			$this->author = 'Yotpo';
 		$this->need_instance = 1;
@@ -231,7 +231,8 @@ class Yotpo extends Module
 		else
 		{
 			$full_product = new Product((int)$product_id, false);
-			return $full_product->getLink();
+			$link = new Link();
+			return $link->getProductLink($full_product);			
 		}
 	}
 
