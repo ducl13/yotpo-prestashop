@@ -112,4 +112,9 @@ Alon Braitstein:
 2012-08-08
 ----
 Alon Braitstein:
-1) Increase language code to 5 letters code. 
+1) Increase language code to 5 letters code.
+
+2012-09-03
+----
+Alon Braitstein:
+1) Fixed bug: when trying to get the product url via prestashop core function, the function didn't return/throw an exception.    
