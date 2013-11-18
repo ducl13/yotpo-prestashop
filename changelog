@@ -118,3 +118,10 @@ Alon Braitstein:
 ----
 Alon Braitstein:
 1) Fixed bug: when trying to get the product url via prestashop core function, the function didn't return/throw an exception.    
+
+2013-09-03
+----
+Alon Braitstein:
+1) Encode html speacial characters in tpl file.
+2) Fix bug at getProductLink function.
+    
