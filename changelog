@@ -124,4 +124,10 @@ Alon Braitstein:
 Alon Braitstein:
 1) Encode html speacial characters in tpl file.
 2) Fix bug at getProductLink function.
+
+2013-11-21
+----
+Alon Braitstein:
+1) Load yQuery asynchronously 
+
     
