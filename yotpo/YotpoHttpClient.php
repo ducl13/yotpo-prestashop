@@ -4,7 +4,7 @@ class YotpoHttpClient
 {
 	const YOTPO_API_URL = 'https://api.yotpo.com';
 	const YOTPO_API_URL_NO_SSL = 'http://api.yotpo.com';
-	const HTTP_REQUEST_TIMEOUT = 30;
+	const HTTP_REQUEST_TIMEOUT = 3;
   	const YOTPO_OAUTH_TOKEN_URL = 'https://api.yotpo.com/oauth/token';
 
 	public function __construct($name = null)
@@ -39,7 +39,7 @@ class YotpoHttpClient
 		if (!empty($token))
 		{
 			$data['utoken'] = $token;
-		    return $this->makePostRequest(self::YOTPO_API_URL.'/apps/'.$app_key.'/purchases/mass_create', $data);
+		    return $this->makePostRequest(self::YOTPO_API_URL.'/apps/'.$app_key.'/purchases/mass_create', $data,20);
 		}
 	}
 
