@@ -521,6 +521,11 @@ class Yotpo extends Module
 
 		$all_statuses = OrderState::getOrderStates($this->getLanguageId());
 		
+			//no configuration found -- use default
+		if(Configuration::get('yotpo_map_status') == false) {
+			Configuration::updateValue('yotpo_map_status', serialize($this->getAcceptedMapStatuses()), false);			
+		}
+		
 		if(method_exists('Tools', "unSerialize")) {
 			$selected_statuses = Tools::unSerialize(Configuration::get('yotpo_map_status'));	
 		}
