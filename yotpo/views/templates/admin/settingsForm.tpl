@@ -80,10 +80,10 @@
         		{foreach from=$yotpo_all_statuses item='order_state'}
 					<label><input type="checkbox" 
 						  name="yotpo_map_status[]"										  
-						  value="{$order_state.id_order_state}"
+						  value="{$order_state.id_order_state|intval}"
 						  {if $order_state.selected == '1'} checked {/if}
 						  />
-						  {$order_state.name}									  
+						  {$order_state.name|escape:'htmlall':'UTF-8'}									  
 					</label>
 				{/foreach}
         	</div>
