@@ -147,11 +147,15 @@ class Yotpo extends Module
 
 	public function hookProductTab()
 	{
-		if ($this->parseProductId() != null && Configuration::get('yotpo_widget_location') == 'tab')
+		if ($this->parseProductId() != null && Configuration::get('yotpo_widget_location') == 'tab') {
+			if (_PS_VERSION_ > '1.5') {
+				return '<h3 class="page-product-heading"><a href="#idTab-yotpo">'.Configuration::get('yotpo_widget_tab_name').'</a></h3>';	
+			}
 			return '<li><a href="#idTab-yotpo">'.Configuration::get('yotpo_widget_tab_name').'</a></li>';
+		}
 		return null;
 	}
-
+	
 	public function hookProductTabContent()
 	{
 		$product = $this->getPageProduct(null);
