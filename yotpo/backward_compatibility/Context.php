@@ -28,7 +28,7 @@ if ((bool)Configuration::get('PS_MOBILE_DEVICE'))
 	require_once(_PS_MODULE_DIR_ . '/mobile_theme/Mobile_Detect.php');
 
 // Retro 1.3, 'class_exists' cause problem with autoload...
-if (version_compare(_PS_VERSION_, '1.4', '<'))
+if (version_compare(_PS_VERSION_, '1.4', '<') || !in_array('Shop', get_declared_classes()))
 {
 	// Not exist for 1.3
 	class Shop extends ObjectModel
@@ -155,9 +155,8 @@ class Context
 		$this->smarty = $smarty;
 		$this->link = $link;
 		
-		$version_mask = explode('.', _PS_VERSION_, 3);
 		
-		if(!($version_mask[0] == "1" && $version_mask[1] == "3")) {
+		if(in_array(get_declared_classes(), 'ControllerBackwardModule')) {
 			$this->controller = new ControllerBackwardModule();	
 		}		
 		if (is_object($cookie))
@@ -293,6 +292,7 @@ class ShopBackwardModule extends Shop
  * Class Controller for a Backward compatibility
  * Allow to use method declared in 1.5
  */
+if(method_exists('Tools','addJS')){
 class ControllerBackwardModule
 {
 	/**
@@ -323,7 +323,7 @@ class ControllerBackwardModule
 	}
 
 }
-
+}
 /**
  * Class Customer for a Backward compatibility
  * Allow to use method declared in 1.5

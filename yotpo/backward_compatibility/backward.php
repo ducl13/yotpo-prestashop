@@ -33,9 +33,9 @@
 if (!in_array('Context', get_declared_classes()))
 	require_once(dirname(__FILE__).'/Context.php');
 
-$is_13 = $version_mask[0] == "1" && $version_mask[1] == "3";
+
 // Get out if the Display (BWDisplay to avoid any conflict)) is already defined
-if (!in_array('BWDisplay', get_declared_classes()) && !$is_13)
+if (!in_array('BWDisplay', get_declared_classes()) && in_array('FrontController', get_declared_classes()))
 	require_once(dirname(__FILE__).'/Display.php');
 
 // If not under an object we don't have to set the context
