@@ -139,4 +139,9 @@ Alon Braitstein:
 ----
 Alon Braitstein:
 1) Small changes to adopt code to Prestashop code style. 
+
+2014-03-31
+----
+Alon Braitstein:
+1) Bug fix: 0002018: Reviews tab messed out in all versions beside 1.6 
     
