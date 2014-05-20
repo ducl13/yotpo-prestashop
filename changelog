@@ -144,4 +144,9 @@ Alon Braitstein:
 ----
 Alon Braitstein:
 1) Bug fix: 0002018: Reviews tab messed out in all versions beside 1.6 
+
+2014-05-20
+Alon Braitstein:
+----
+1) Ensure app key exist before loading any fornt end hook.
     

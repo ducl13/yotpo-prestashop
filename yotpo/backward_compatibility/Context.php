@@ -156,7 +156,7 @@ class Context
 		$this->link = $link;
 		
 		
-		if(in_array(get_declared_classes(), 'ControllerBackwardModule')) {
+		if(in_array('ControllerBackwardModule', get_declared_classes())) {
 			$this->controller = new ControllerBackwardModule();	
 		}		
 		if (is_object($cookie))
