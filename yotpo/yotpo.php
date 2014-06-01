@@ -113,16 +113,20 @@ class Yotpo extends Module
 		Configuration::updateValue('yotpo_map_status', serialize($this->getAcceptedMapStatuses()), false);
 		return true;
 	}
+    
+
+  
 
 	public function hookheader()
 	{
+
 		$app_key = Configuration::get('yotpo_app_key');
 		if(isset($app_key) && !empty($app_key)) {
 			$smarty = $this->context->smarty;
 			$smarty->assign(array('yotpoAppkey' => $app_key, 
 								  'yotpoDomain' => $this->getShopDomain(),
 								  'yotpoLanguage' => $this->getLanguage()));
-			
+					
 			if(isset($this->context->controller)) {
 				$this->context->controller->addJS(($this->_path).'/js/headerScript.js');
 			}
@@ -130,10 +134,12 @@ class Yotpo extends Module
 				return '<script type="text/javascript" src="'.$this->_path.'/js/headerScript.js"></script>';				
 			}	
 		}	
+
 	}
 
 	public function hookproductfooter($params)
 	{
+		
 		$app_key = Configuration::get('yotpo_app_key');
 		if(isset($app_key) && !empty($app_key)) {
 			$widgetLocation = Configuration::get('yotpo_widget_location');
@@ -320,12 +326,10 @@ class Yotpo extends Module
 		}
 		$smarty = $this->context->smarty;			
 		$smarty->assign('richSnippetsCode', $rich_snippets);
-		
+		$smarty->assign('showWidget',Configuration::get('yotpo_widget_location'));
 		$this->assignProductVars($product);
-		if (Configuration::get('yotpo_widget_location') != 'other')
-			return $this->display(__FILE__, 'views/templates/front/widgetDiv.tpl');
-
-		return null;
+	    return $this->display(__FILE__, 'views/templates/front/widgetDiv.tpl');
+		
 	}
 
 	private function assignProductVars($product = null)
