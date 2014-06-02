@@ -9,4 +9,3 @@
 	data-description="{$yotpoProductDescription|escape:'htmlall':'UTF-8'}"
 	data-bread-crumbs="{$yotpoProductBreadCrumbs|escape:'htmlall':'UTF-8'}"
 	data-lang="{$yotpoLanguage|escape:'htmlall':'UTF-8'}"></div>
-
