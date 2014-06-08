@@ -502,7 +502,8 @@ class Yotpo extends Module
 
     private function displaySettingsForm()
     {
-       
+
+
         if (!Configuration::get('yotpo_rich_snippet_cache_created')) {
             $created = YotpoSnippetCache::createDB();
             Configuration::updateValue('yotpo_rich_snippet_cache_created', 1, $created);
@@ -558,20 +559,20 @@ class Yotpo extends Module
         //  }
         // }
         $regexp = '/yotpo_map_enabled' | 'yotpo_language_as_site' | 'yotpo_rich_snippets/';
-        $settings_template = $this->getNonCachedTemplate($this->display(__FILE__, 'views/templates/admin/settingsForm.tpl'), $regexp);
+        $settings_template = $this->getNonCachedTemplate('views/templates/admin/settingsForm.tpl', $regexp);
 
 
         $this->_html .= $settings_template;
     }
 
-   /*
-    * deletes the cached smarty template and returns the new one
-    *
-    */
+    /*
+     * deletes the cached smarty template - if needed ( prevents bugs where you update a tempalte's code but users get older , cached versions instead).
+     * returns the non-cached template.
+     */
 
     private function getNonCachedTemplate($template_path, $regexp)
     {
-
+        
         try {
             $smarty = $this->context->smarty;
             $template = $this->display($template_path);
@@ -592,7 +593,8 @@ class Yotpo extends Module
             }
             return $template;
         } catch (Exception $e) {
-            die("exception !!" . $e);
+
+            die("exception !!" . _PS_MODULE_DIR_ . $this->name . $template_path);
         }
 
     }
@@ -696,7 +698,7 @@ class Yotpo extends Module
         LEFT JOIN `' . _DB_PREFIX_ . 'orders` o ON (o.`id_order` = oh.`id_order`)
         LEFT JOIN `' . _DB_PREFIX_ . 'customer` c ON (c.`id_customer` = o.`id_customer`)
         WHERE oh.`id_order_history` IN (SELECT MAX(`id_order_history`) FROM `' . _DB_PREFIX_ . 'order_history` GROUP BY `id_order`) AND
-        o.`date_add` <  NOW() AND 
+        o.`date_add` <  NOW() AND
         DATE_SUB(NOW(), INTERVAL ' . self::PAST_ORDERS_DAYS_BACK . ' day) < o.`date_add` AND
         oh.`id_order_state` IN (' . join(',', $this->getAcceptedMapStatuses()) . ')
         LIMIT 0,' . self::PAST_ORDERS_LIMIT . '');
