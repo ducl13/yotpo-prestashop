@@ -538,7 +538,8 @@ class Yotpo extends Module
     }
 
     /*
-     * deletes the cached smarty template - if needed ( prevents bugs where you update a tempalte's code but users get older , cached versions instead).
+     * deletes the cached smarty template - if needed (if the cached version template is an older version and therefore different than the current template version)
+     *
      * returns the non-cached template.
      */
 
@@ -546,13 +547,13 @@ class Yotpo extends Module
     {
         $smarty = $this->context->smarty;
         $template = $this->display($template_path);
-        if (!preg_match($regexp, $template, $matches)) //this means the cache of the old template was returned , so we need to delete it:
+        if (!preg_match($regexp, $template, $matches)) //this means the cache of the old template version was returned , so we need to delete it:
         {
             if (method_exists($smarty, 'clearCompiledTemplate')) {
-                $smarty->clearCompiledTemplate(_PS_MODULE_DIR_ . $this->name . $template_path);
+                $smarty->clearCompiledTemplate();
                 $template = $this->display(__FILE__, $template_path);
             } elseif (method_exists($smarty, 'clear_compiled_tpl')) {
-                $smarty->clear_compiled_tpl(_PS_MODULE_DIR_ . $this->name . $template_path);
+                $smarty->clear_compiled_tpl();
                 $template = $this->display(__FILE__, $template_path);
             } elseif (isset($smarty->force_compile)) {
                 $value = $smarty->force_compile;
