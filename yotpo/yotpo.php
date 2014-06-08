@@ -298,13 +298,8 @@ class Yotpo extends Module
 
         $this->assignProductVars($product);
         if (Configuration::get('yotpo_widget_location') != 'other'){
-
-
-            return $this->display(__FILE__, 'views/templates/front/widgetDiv.tpl');
-
-        }
-
-
+            return $this->getNonCachedTemplate('views/templates/front/widgetDiv.tpl','yotpo-main-widget');
+         }
         return null;
     }
 
@@ -560,8 +555,6 @@ class Yotpo extends Module
         // }
         $regexp = '/yotpo_map_enabled' | 'yotpo_language_as_site' | 'yotpo_rich_snippets/';
         $settings_template = $this->getNonCachedTemplate('views/templates/admin/settingsForm.tpl', $regexp);
-
-
         $this->_html .= $settings_template;
     }
 
@@ -572,7 +565,7 @@ class Yotpo extends Module
 
     private function getNonCachedTemplate($template_path, $regexp)
     {
-        
+
         try {
             $smarty = $this->context->smarty;
             $template = $this->display($template_path);
