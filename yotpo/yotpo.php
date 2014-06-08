@@ -297,9 +297,9 @@ class Yotpo extends Module
         $smarty->assign('richSnippetsCode', $rich_snippets);
 
         $this->assignProductVars($product);
-        if (Configuration::get('yotpo_widget_location') != 'other'){
-            return $this->getNonCachedTemplate('views/templates/front/widgetDiv.tpl','yotpo-main-widget');
-         }
+        if (Configuration::get('yotpo_widget_location') != 'other') {
+            return $this->getNonCachedTemplate('views/templates/front/widgetDiv.tpl', 'yotpo-main-widget');
+        }
         return null;
     }
 
@@ -532,27 +532,6 @@ class Yotpo extends Module
             'yotpo_language_as_site' => Configuration::get('yotpo_language_as_site'),
             'yotpo_rich_snippets' => Configuration::get('yotpo_rich_snippets'),
             'yotpo_all_statuses' => $all_statuses));
-
-        // $settings_template = $this->display(__FILE__, 'views/templates/admin/settingsForm.tpl');
-        // if (strpos($settings_template, 'yotpo_map_enabled') != false || strpos($settings_template, 'yotpo_language_as_site') == false || strpos($settings_template, 'yotpo_rich_snippets') == false)
-        // {
-        //  if(method_exists($smarty, 'clearCompiledTemplate'))
-        //  {
-        //      $smarty->clearCompiledTemplate(_PS_MODULE_DIR_ . $this->name .'/views/templates/admin/settingsForm.tpl');
-        //      $settings_template = $this->display(__FILE__, 'views/templates/admin/settingsForm.tpl');
-        //  }
-        //  elseif (method_exists($smarty, 'clear_compiled_tpl'))
-        //  {
-        //      $smarty->clear_compiled_tpl(_PS_MODULE_DIR_ . $this->name .'/views/templates/admin/settingsForm.tpl');
-        //      $settings_template = $this->display(__FILE__, 'views/templates/admin/settingsForm.tpl');
-        //  }
-        //  elseif (isset($smarty->force_compile)) {
-        //      $value = $smarty->force_compile;
-        //      $smarty->force_compile = true;
-        //      $settings_template = $this->display(__FILE__, 'views/templates/admin/settingsForm.tpl');
-        //      $smarty->force_compile = $value;
-        //  }
-        // }
         $regexp = '/yotpo_map_enabled' | 'yotpo_language_as_site' | 'yotpo_rich_snippets/';
         $settings_template = $this->getNonCachedTemplate('views/templates/admin/settingsForm.tpl', $regexp);
         $this->_html .= $settings_template;
@@ -565,31 +544,24 @@ class Yotpo extends Module
 
     private function getNonCachedTemplate($template_path, $regexp)
     {
-
-        try {
-            $smarty = $this->context->smarty;
-            $template = $this->display($template_path);
-            if (!preg_match($regexp, $template, $matches)) //this means the cache of the old template was returned , so we need to delete it:
-            {
-                if (method_exists($smarty, 'clearCompiledTemplate')) {
-                    $smarty->clearCompiledTemplate(_PS_MODULE_DIR_ . $this->name . $template_path);
-                    $template = $this->display(__FILE__, $template_path);
-                } elseif (method_exists($smarty, 'clear_compiled_tpl')) {
-                    $smarty->clear_compiled_tpl(_PS_MODULE_DIR_ . $this->name . $template_path);
-                    $template = $this->display(__FILE__, $template_path);
-                } elseif (isset($smarty->force_compile)) {
-                    $value = $smarty->force_compile;
-                    $smarty->force_compile = true;
-                    $template = $this->display(__FILE__, $template_path);
-                    $smarty->force_compile = $value;
-                }
+        $smarty = $this->context->smarty;
+        $template = $this->display($template_path);
+        if (!preg_match($regexp, $template, $matches)) //this means the cache of the old template was returned , so we need to delete it:
+        {
+            if (method_exists($smarty, 'clearCompiledTemplate')) {
+                $smarty->clearCompiledTemplate(_PS_MODULE_DIR_ . $this->name . $template_path);
+                $template = $this->display(__FILE__, $template_path);
+            } elseif (method_exists($smarty, 'clear_compiled_tpl')) {
+                $smarty->clear_compiled_tpl(_PS_MODULE_DIR_ . $this->name . $template_path);
+                $template = $this->display(__FILE__, $template_path);
+            } elseif (isset($smarty->force_compile)) {
+                $value = $smarty->force_compile;
+                $smarty->force_compile = true;
+                $template = $this->display(__FILE__, $template_path);
+                $smarty->force_compile = $value;
             }
-            return $template;
-        } catch (Exception $e) {
-
-            die("exception !!" . _PS_MODULE_DIR_ . $this->name . $template_path);
         }
-
+        return $template;
     }
 
     private function getProductModel($product)
