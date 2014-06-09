@@ -323,10 +323,7 @@ class Yotpo extends Module
 		$smarty->assign('richSnippetsCode', $rich_snippets);
 		$smarty->assign('showWidget',Configuration::get('yotpo_widget_location'));
 		$this->assignProductVars($product);
-	    if (Configuration::get('yotpo_widget_location') != 'other') {
-            return $this->getNonCachedTemplate('views/templates/front/widgetDiv.tpl', 'yotpo-main-widget');
-        }
-        return null;
+	    return $this->display(__FILE__, 'views/templates/front/widgetDiv2.tpl');
 		
 	}
 
