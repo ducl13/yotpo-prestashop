@@ -14,7 +14,6 @@
  {/if}
     <script type="text/javascript">
        var yotpoAppkey = "{$yotpoAppkey|escape:'htmlall':'UTF-8'}" ;
-  
     </script>
 
  
