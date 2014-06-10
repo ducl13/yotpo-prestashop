@@ -121,13 +121,8 @@ class Yotpo extends Module
 			$smarty = $this->context->smarty;
 			$smarty->assign(array('yotpoAppkey' => $app_key, 
 								  'yotpoDomain' => $this->getShopDomain(),
-								  'yotpoLanguage' => $this->getLanguage()));	
-			if(isset($this->context->controller)) {
-				$this->context->controller->addJS(($this->_path).'/js/headerScript.js');
-			}
-			else {
-				return '<script type="text/javascript" src="'.$this->_path.'/js/headerScript.js"></script>';				
-			}	
+								  'yotpoLanguage' => $this->getLanguage()));
+			return $this->display(__FILE__, 'views/templates/front/header.tpl');	
 		}	
 
 	}
@@ -138,7 +133,9 @@ class Yotpo extends Module
 		$app_key = Configuration::get('yotpo_app_key');
 		if(isset($app_key) && !empty($app_key)) {
 			$widgetLocation = Configuration::get('yotpo_widget_location');
-			return ($widgetLocation == 'footer' || $widgetLocation == 'other') ? $this->showWidget($params['product']) : null;			
+			if (Configuration::get('yotpo_widget_location') == 'footer')
+				return $this->showWidget($params['product']);
+						
 		}
 	}
 
@@ -320,8 +317,7 @@ class Yotpo extends Module
 			$rich_snippets .= $this->getRichSnippet($this->parseProductId());
 		}
 		$smarty = $this->context->smarty;			
-		$smarty->assign('richSnippetsCode', $rich_snippets);
-		$smarty->assign('showWidget',Configuration::get('yotpo_widget_location'));
+		$smarty->assign('richSnippetsCode', $rich_snippets);		
 		$this->assignProductVars($product);
 	    return $this->display(__FILE__, 'views/templates/front/widgetDiv2.tpl');
 		
