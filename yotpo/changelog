@@ -97,4 +97,9 @@
 2014-05-20
 ----
 1) Ensure app key exist before loading any fornt end hook.
+
+2014-07-15
+----
+1) Update plugin to show widget V2.
+
    
