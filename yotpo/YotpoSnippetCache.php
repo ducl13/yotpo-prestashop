@@ -63,6 +63,6 @@ class YotpoSnippetCache {
 	}
 		
 	public static function dropDB() {
-		return Db::getInstance()->execute('DROP TABLE `'._DB_PREFIX_.'yotposnippetcache`');
+		return Db::getInstance()->execute('DROP TABLE IF EXISTS `'._DB_PREFIX_.'yotposnippetcache`');
 	}
 }

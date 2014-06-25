@@ -98,7 +98,7 @@ class Yotpo extends Module
 			) 
 			return false;
 			
-		if(version_compare(_PS_VERSION_, '1.5') >= 0 && (!$this->registerHook('yotpoProductAvarageScore') ||
+		if(version_compare(_PS_VERSION_, '1.5') >= 0 && (!$this->registerHook('yotpoProductAverageScore') ||
 		   !$this->registerHook('yotpoProductReviewCount'))) {
 		   		return false;
 		   }
@@ -218,7 +218,7 @@ class Yotpo extends Module
 		}
 	}
 
-	public function hookyotpoProductAvarageScore($params = array()) {
+	public function hookyotpoProductAverageScore($params = array()) {
 		$rich_snippet_data = $this->getRichSnippet($params['product_id']);
 		if(is_array($rich_snippet_data) && array_key_exists( 'reviews_average',$rich_snippet_data)){
 			return $rich_snippet_data['reviews_average'];
