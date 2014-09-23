@@ -23,7 +23,7 @@ class Yotpo extends Module
 		$version_test = $version_mask[0] > 0 && $version_mask[1] > 4;
 		$this->name = 'yotpo';
 		$this->registrationState = null;
-		$this->store_email = Configuration::get('PS_SHOP_EMAIL');
+		$this->storeEmail = Configuration::get('PS_SHOP_EMAIL');
 		$this->tab = $version_test ? 'advertising_marketing' : 'Reviews';
 		$this->version = '1.4.3';
 		if ($version_test)
@@ -259,8 +259,11 @@ class Yotpo extends Module
 			$this->context->controller->addCSS($this->_path.'/css/form.css', 'all');		
 		else
 			echo '<link rel="stylesheet" type="text/css" href="../modules/yotpo/css/form.css" />';	
-
-		$force_settings = $this->firstStep() == 'b2c';
+		//die(Configuration::get('yotpo_app_key'));
+		if (!Configuration::hasKey('yotpo_app_key') || Configuration::get('yotpo_app_key')=='' ) {
+			$force_settings = $this->firstStep() == 'b2c';
+		}
+	
 		if ($this->registrationState=="existing_b2b_successful") {
 			 return $this->displayB2BLoginForm();
 		}
@@ -410,6 +413,7 @@ class Yotpo extends Module
 	
 	private function handleExistingB2BSubmit() {
 		//check if form was submitted or not , if not submitted show the error
+		
 		if (Tools::isSubmit('yotpo_register')) {
 			//check if email + password combination matches..
 			
@@ -434,13 +438,14 @@ class Yotpo extends Module
 			
 		} 
 		else {
-			$this->prepareError($this->l('This e-mail address is already taken.'));
+			//$this->prepareError($this->l('This e-mail address is already taken.'));
 		}
 			  
 	}
 	
 	private function firstStep()
 	{
+		
 		//in the new flow , the form is only shown for an existing b2b user
 		if (Tools::isSubmit('yotpo_register')) {
 			$this->handleExistingB2BSubmit();
@@ -448,15 +453,15 @@ class Yotpo extends Module
 		}
 		$name = Db::getInstance()->ExecuteS('SELECT  firstname FROM PS_EMPLOYEE LIMIT 1');
 		$name = $name[0]["firstname"];
-		$b2b_email_response= $this->httpClient()->checkeMailAvailability($this->store_email);
+		$b2b_email_response= $this->httpClient()->checkeMailAvailability($this->storeEmail);
 		if ($b2b_email_response['status_code'] == 200 && 
 		  	($b2b_email_response['json'] == true && $b2b_email_response['response']['available'] == true) || 
 		  	($b2b_email_response['json'] == false && preg_match("/available[\W]*(true)/",$b2b_email_response['response']) == 1))
 		{ //new email or existing b2c
-			$response = $this->httpClient()->check_if_b2c_user($this->store_email);
+			$response = $this->httpClient()->check_if_b2c_user($this->storeEmail);
                 if (empty($response['response']['data'])) //new email 
                 {
-					$registerResponse = $this->httpClient()->register($this->store_email, $name, null, _PS_BASE_URL_);
+					$registerResponse = $this->httpClient()->register($this->storeEmail, $name, null, _PS_BASE_URL_);
 					if ($registerResponse['status_code'] == 200)
 					{
 						$app_key ='';
@@ -584,7 +589,7 @@ class Yotpo extends Module
 	{
 		$smarty = $this->context->smarty;
 
-		$smarty->assign(array('yotpo_action' => $_SERVER['REQUEST_URI'], 'yotpo_email' => Tools::getValue('yotpo_user_email'),
+		$smarty->assign(array('yotpo_action' => $_SERVER['REQUEST_URI'], 'yotpo_email' => $this->storeEmail,
 		'yotpo_userName' => Tools::getValue('yotpo_user_name')));
 
 		$this->_html .= $this->display(__FILE__, 'views/templates/admin/registrationForm.tpl');

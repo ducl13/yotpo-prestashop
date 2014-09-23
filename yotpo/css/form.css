@@ -67,6 +67,15 @@
 	float: left;
 	padding-right: 10px;
 }
+.y-reset-link,.y-create-account-link {
+	font-size: 15px;
+}
+.y-reset-link {
+	margin-bottom: 5px;
+}
+#y-logo-registration {
+	float: none;
+}
 .y-side-box {
 	width: 36%;
 	float: right;
