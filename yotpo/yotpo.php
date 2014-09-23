@@ -592,13 +592,13 @@ class Yotpo extends Module
 		$smarty->assign(array('yotpo_action' => $_SERVER['REQUEST_URI'], 'yotpo_email' => $this->storeEmail,
 		'yotpo_userName' => Tools::getValue('yotpo_user_name')));
 
-		$this->_html .= $this->display(__FILE__, 'views/templates/admin/registrationForm.tpl');
+		$this->_html .= $this->display(__FILE__, 'views/templates/admin/existing_b2b_step_1.tpl');
 
 		return $this->_html;
 	}
 	
 	private function displayB2BLoginForm() {
-		$settings_template = $this->display(__FILE__, 'views/templates/admin/existingB2BLoginForm.tpl');
+		$settings_template = $this->display(__FILE__, 'views/templates/admin/existing_b2b_step_2.tpl');
 		return $this->_html .= $settings_template;
 	}
 
