@@ -259,7 +259,6 @@ class Yotpo extends Module
 			$this->context->controller->addCSS($this->_path.'/css/form.css', 'all');		
 		else
 			echo '<link rel="stylesheet" type="text/css" href="../modules/yotpo/css/form.css" />';	
-		//die(Configuration::get('yotpo_app_key'));
 		if (!Configuration::hasKey('yotpo_app_key') || Configuration::get('yotpo_app_key')=='' ) {
 			$force_settings = $this->firstStep() == 'b2c';
 		}
