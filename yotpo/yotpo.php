@@ -450,7 +450,7 @@ class Yotpo extends Module
 			$this->handleExistingB2BSubmit();
 			return ;
 		}
-		$name = Db::getInstance()->ExecuteS('SELECT  firstname FROM PS_EMPLOYEE LIMIT 1');
+		$name = Db::getInstance()->ExecuteS('SELECT  firstname FROM ps_employee LIMIT 1');
 		$name = $name[0]["firstname"];
 		$b2b_email_response= $this->httpClient()->checkeMailAvailability($this->storeEmail);
 		if ($b2b_email_response['status_code'] == 200 && 
