@@ -13,7 +13,7 @@
 			<div class="y-input"><input type="text" name="yotpo_app_key" value="{$yotpo_appKey|escape:'htmlall':'UTF-8'}" /></div>
 			<div class="y-label">{l s='Secret token' mod='yotpo'}</div>
 			<div class="y-input"><input type="text" name="yotpo_oauth_token" value="{$yotpo_oauthToken|escape:'htmlall':'UTF-8'}"/></div>
-			<div class="y-login-link">You will have to <a href="http://my.yotpo.com/login?origin=prestashop&redirect_after_login=true" target="_blank">login to Yotpo</a> to fill in the app key and secret.</div>           	
+			<div class="y-login-link">You will have to <a href="http://my.yotpo.com/login?origin=prestashop&utm_source=prestashop_admin&utm_medium=admin&param_anchor=step8&utm_campaign=existing_user_login_prestashop_admin&redirect_after_login=http://my.yotpo.com/install/prestashop" target="_blank">login to Yotpo</a> to fill in the app key and secret.</div>           	
 		</fieldset>
 
         
