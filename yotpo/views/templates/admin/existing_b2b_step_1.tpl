@@ -17,7 +17,7 @@
 			<div class="y-footer"><input type="submit" name="yotpo_register" value="{l s='Login' mod='yotpo'}" class="y-submit-btn" /></div>
 			<div class="y-footer">	
 			<div class="y-reset-link">	
-				<a href="https://my.yotpo.com/login?origin=prestashop&target=reset&utm_source=prestashop_admin&utm_medium=link&utm_campaign=create_new_account_prestashop_admin" target="_blank">Reset Password</a>
+				<a href="https://my.yotpo.com/login?origin=prestashop&target=reset&utm_source=prestashop_admin&utm_medium=link&utm_campaign=create_new_account_prestashop_admin&platform=prestashop" target="_blank">Reset Password</a>
 			</div>
 			<div class="y-create-account-link">
 				<a href="https://my.yotpo.com/register?utm_source=prestashop_admin&utm_medium=link&utm_campaign=create_new_account_prestashop_admin" target="_blank" >Create new Yotpo account </a>
