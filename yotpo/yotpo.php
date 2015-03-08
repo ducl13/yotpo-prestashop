@@ -23,7 +23,7 @@ class Yotpo extends Module
 		$version_test = $version_mask[0] > 0 && $version_mask[1] > 4;
 		$this->name = 'yotpo';
 		$this->tab = $version_test ? 'advertising_marketing' : 'Reviews';
-		$this->version = '1.4.2';
+		$this->version = '1.4.3';
 		if ($version_test)
 			$this->author = 'Yotpo';
 		$this->need_instance = 1;
@@ -562,7 +562,7 @@ class Yotpo extends Module
 				Configuration::updateValue('yotpo_rich_snippet_cache_created', 1);
 			}
 			else {
-				$this->registerHook('yotpoProductAvarageScore');
+				$this->registerHook('yotpoProductAverageScore');
 				$this->registerHook('yotpoProductReviewCount');
 				YotpoSnippetCache::updateDB();
 				Configuration::updateValue('yotpo_db_version', $this->db_version);
