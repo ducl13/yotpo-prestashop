@@ -50,11 +50,10 @@
 					&lt;div class="yotpo yotpo-main-widget" </br>
 					data-product-id="{$yotpoProductId|intval}"</br>
 					data-name="{$yotpoProductName|escape:'htmlall':'UTF-8'}" </br>
-					data-url="{$link-&gt;getProductLink($smarty.get.id_product, $smarty.get.id_product.link_rewrite)|escape:'htmlall':'UTF-8'}" </br>
+					data-url="{$yotpoProductLink|escape:'htmlall':'UTF-8'}" </br>
 					data-image-url="{$yotpoProductImageUrl|escape:'htmlall':'UTF-8'}" </br>
 					data-description="{$yotpoProductDescription|escape:'htmlall':'UTF-8'}" </br>
 					data-lang="{$yotpoLanguage|escape:'htmlall':'UTF-8'}"&gt; </br>
-					{$richSnippetsCode|escape:'UTF-8'} <br>
 					&lt;/div&gt;
 					{/literal}
 					</div>
@@ -101,7 +100,7 @@
 	               data-product-id="{$yotpoProductId|intval}"<br>
 	               data-product-models="{$yotpoProductModel|escape:'htmlall':'UTF-8'}" <br>
 	               data-name="{$yotpoProductName|escape:'htmlall':'UTF-8'}" <br>
-	               data-url="{$link-&gt;getProductLink($smarty.get.id_product, $smarty.get.id_product.link_rewrite)|escape:'htmlall':'UTF-8'}" <br>
+	               data-url="{$yotpoProductLink|escape:'htmlall':'UTF-8'}" <br>
 	               data-image-url="{$yotpoProductImageUrl|escape:'htmlall':'UTF-8'}" <br>
 	               data-description="{$yotpoProductDescription|escape:'htmlall':'UTF-8'}" <br>
 	               data-bread-crumbs="{$yotpoProductBreadCrumbs|escape:'htmlall':'UTF-8'}"<br>
