@@ -48,12 +48,13 @@
 					<div class="y-code">
 					{literal}
 					&lt;div class="yotpo yotpo-main-widget" </br>
-					data-product-id="{$yotpoProductId|intval}"</br>
+					data-product-id="{$yotpoProductId|intval}" </br>
+					data-price="{$yotpoProductPrice}" </br>
+					data-currency="USD" </br>
 					data-name="{$yotpoProductName|escape:'htmlall':'UTF-8'}" </br>
 					data-url="{$yotpoProductLink|escape:'htmlall':'UTF-8'}" </br>
 					data-image-url="{$yotpoProductImageUrl|escape:'htmlall':'UTF-8'}" </br>
-					data-description="{$yotpoProductDescription|escape:'htmlall':'UTF-8'}" </br>
-					data-lang="{$yotpoLanguage|escape:'htmlall':'UTF-8'}"&gt; </br>
+					data-description="{$yotpoProductDescription|escape:'htmlall':'UTF-8'}"&gt; </br>
 					&lt;/div&gt;
 					{/literal}
 					</div>
@@ -94,17 +95,9 @@
 	        <div class="y-label">{l s='In order to locate the bottom line in a custom position, please open the "root" folder, then enter the "themes" library. Locate the specific theme you would like the widget to show up on, and in this specific themes folder, locate the file "product.tpl". Add the code here, wherever you would like it placed.' mod='yotpo'}<br /><br /> 
 	          <div class="y-code">
 	            {literal}
-	            &lt;div class="yotpo bottomLine" <br>
-	               data-appkey="{$yotpoAppkey|escape:'htmlall':'UTF-8'}"<br>
-	               data-domain="{$yotpoDomain|escape:'htmlall':'UTF-8'}"<br>
-	               data-product-id="{$yotpoProductId|intval}"<br>
-	               data-product-models="{$yotpoProductModel|escape:'htmlall':'UTF-8'}" <br>
-	               data-name="{$yotpoProductName|escape:'htmlall':'UTF-8'}" <br>
-	               data-url="{$yotpoProductLink|escape:'htmlall':'UTF-8'}" <br>
-	               data-image-url="{$yotpoProductImageUrl|escape:'htmlall':'UTF-8'}" <br>
-	               data-description="{$yotpoProductDescription|escape:'htmlall':'UTF-8'}" <br>
-	               data-bread-crumbs="{$yotpoProductBreadCrumbs|escape:'htmlall':'UTF-8'}"<br>
-	               data-lang="{$yotpoLanguage|escape:'htmlall':'UTF-8'}"&gt; <br>
+	            &lt;div class="yotpo bottomLine" style="margin-bottom: 20px;" <br>
+								data-product-id="{$yotpoProductId|intval}" <br>
+								data-url="{$yotpoProductLink|escape:'htmlall':'UTF-8'}"&gt; <br>
 	              &lt;/div&gt;
 	           {/literal}
 	         </div>

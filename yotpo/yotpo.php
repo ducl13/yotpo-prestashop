@@ -5,7 +5,7 @@ if (!defined('_PS_VERSION_'))
 
 class Yotpo extends Module
 {
-	const PAST_ORDERS_DAYS_BACK = 90;
+	const PAST_ORDERS_DAYS_BACK = 14;
 	const PAST_ORDERS_LIMIT = 10000;
 	const BULK_SIZE = 1000;	
 	private $_html = '';
@@ -205,15 +205,46 @@ class Yotpo extends Module
 		$order_id = !empty($params['objOrder']) && !empty($params['objOrder']->id) ? $params['objOrder']->id : null;
 		$order_amount = !empty($params['total_to_pay']) ? $params['total_to_pay'] : '';
 		$order_currency = !empty($params['currencyObj']) && !empty($params['currencyObj']->iso_code) ? $params['currencyObj']->iso_code : '';
-
+		$order_date = !empty($params['objOrder']) && !empty($params['objOrder']->date_add) ? $params['objOrder']->date_add : null;
+		$customer = $this->context->customer;
+		$customer_email = $customer->email;
+		$customer_name = addslashes($customer->firstname) . ' ' . addslashes($customer->lastname);
+		$products = !empty($params['objOrder']) ? $params['objOrder']->getProductsDetail() : null;
+		
 		if(!empty($app_key) && !is_null($order_id)) {
 			$smarty = $this->context->smarty;
+
+			$smarty->assign('yotpoAppKey', $app_key);
+
+			$products_arr = '';
+			foreach ($products as $k => $product) {
+				$products_arr = $products_arr . '{' .
+												'productId: "' . $product['product_id'] . '",' .
+      									'productName: "' . addslashes($product['product_name']) . '",' .
+      									'productPrice: "' . $product['product_price'] . '"' .
+												'}';
+				$products_arr = $products_arr . ', ';
+			}
+			$products_arr = rtrim($products_arr, ', ');
+
+			$trackConversionData = '{orderId: "' . $order_id . 
+														'", orderAmount: "' . $order_amount . 
+														'", orderCurrency: "' . $order_currency . 
+														'", orderDate: "' . $order_date .
+														'", customerEmail: "' . $customer_email .
+														'", customerName: "' . $customer_name .
+														'", products: [' . $products_arr . ']' .
+														'}';
+
+			$smarty->assign('yotpoTrackConversionData', $trackConversionData);
+
 			$conversion_params = "app_key="      .$app_key.
                  				 "&order_id="    .$order_id.
                  				 "&order_amount=".$order_amount.
                  				 "&order_currency="  .$order_currency;
 			$conversion_url = "https://api.yotpo.com/conversion_tracking.gif?$conversion_params";
 			$smarty->assign('yotpoConversionUrl', $conversion_url);
+
 			return $this->display(__FILE__,'views/templates/front/conversionImage.tpl');
 		}
 	}
@@ -353,6 +384,7 @@ class Yotpo extends Module
 
 			$smarty = $this->context->smarty;
 			$smarty->assign(array('yotpoProductId' => (int)$product->id,
+			'yotpoProductPrice' => $product->price,
 			'yotpoProductName' => strip_tags($product->name),
 			'yotpoProductDescription' => strip_tags($product->description),
 			'yotpoProductModel' => $this->getProductModel($product),
