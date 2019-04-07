@@ -122,6 +122,10 @@ Yotpo
     margin-bottom: 20px;
 }
 
+.aggregateRating.no-display {
+    display: none;
+}
+
 
 /public_html/themes/roma1/css/product_list.css:
 
