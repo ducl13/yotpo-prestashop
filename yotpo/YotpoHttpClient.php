@@ -50,8 +50,9 @@ class YotpoHttpClient
 		$token = $this->grantOauthAccess($app_key, $secret_token);
 		if (!empty($token))
 		{
+			$data['validate_data'] = 'false';
 			$data['utoken'] = $token;
-		    return $this->makePostRequest(self::YOTPO_API_URL.'/apps/'.$app_key.'/purchases/mass_create', $data,20);
+		    return $this->makePostRequest(self::YOTPO_API_URL.'/apps/'.$app_key.'/purchases/mass_create', $data, 20);
 		}
 	}
 
@@ -67,13 +68,13 @@ class YotpoHttpClient
 	
 	public function makeRichSnippetRequest($app_key, $product_sku)
 	{
-	    return $this->makeGetRequest(self::YOTPO_API_URL_NO_SSL.'/products/'.$app_key.'/richsnippet/'.$product_sku, array(), 2);
+	    return $this->makeGetRequest(self::YOTPO_API_URL_NO_SSL.'/products/'.$app_key.'/'.$product_sku.'/bottomline', array(), 2);
 	}
 	
 	public function makePostRequest($url, $data, $timeout = self::HTTP_REQUEST_TIMEOUT, $parse_result = true)
 	{		
 		$ch = curl_init($url);
-		list($is_json, $parsed_data) = YotpoHttpClient::jsonOrUrlEncode($data);    
+		list($is_json, $parsed_data) = YotpoHttpClient::jsonOrUrlEncode($data); 
 		$content_type = $is_json ? 'application/json' : 'application/x-www-form-urlencoded';                                                                                                                         
 		curl_setopt($ch, CURLOPT_CUSTOMREQUEST, 'POST');
 		curl_setopt($ch, CURLOPT_POSTFIELDS, $parsed_data);
@@ -83,7 +84,10 @@ class YotpoHttpClient
 		curl_setopt($ch, CURLOPT_SSL_VERIFYHOST, false); /* Added by PrestaShop */
 		curl_setopt($ch, CURLOPT_SSL_VERIFYPEER, false); /* Added by PrestaShop */		
 		$result = curl_exec($ch);
-		curl_close ($ch);	
+		curl_close ($ch);
+		
+		PrestaShopLogger::addLog($result);
+
 		if($parse_result) {
 			return YotpoHttpClient::jsonDecode($result, true);	
 		}

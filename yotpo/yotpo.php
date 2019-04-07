@@ -5,9 +5,9 @@ if (!defined('_PS_VERSION_'))
 
 class Yotpo extends Module
 {
-	const PAST_ORDERS_DAYS_BACK = 14;
+	const PAST_ORDERS_DAYS_BACK = 30;
 	const PAST_ORDERS_LIMIT = 10000;
-	const BULK_SIZE = 1000;	
+	const BULK_SIZE = 1;
 	private $_html = '';
 	private $_httpClient = null;
 	private $_yotpo_module_path = '';
@@ -99,7 +99,7 @@ class Yotpo extends Module
 			return false;
 			
 		if(version_compare(_PS_VERSION_, '1.5') >= 0 && (!$this->registerHook('yotpoProductAverageScore') ||
-		   !$this->registerHook('yotpoProductReviewCount'))) {
+			 !$this->registerHook('yotpoProductReviewCount'))) {
 		   		return false;
 		   }
 		/* Default language: English; Default widget location: Product page Footer; Default widget tab name: "Reviews" 
@@ -191,6 +191,7 @@ class Yotpo extends Module
 		}			
 	}
 	
+	/*
 	public function hookextraRight()
 	{	
 		$app_key = Configuration::get('yotpo_app_key');
@@ -198,7 +199,31 @@ class Yotpo extends Module
 			return $this->showBottomLine('right_column');	
 		}				
 	}
-		
+	*/
+
+	private function assignProductRichSnippetsVars()
+	{
+		if(!$this->_is_smarty_product_rich_snippets_assigned)
+		{
+			$product = $this->getPageProduct();
+			$this->_is_smarty_product_rich_snippets_assigned = true;
+
+			$rich_snippet_data = $this->getRichSnippet($product->id);
+
+			$smarty = $this->context->smarty;
+			$smarty->assign(array('yotpoRatingValue' => $rich_snippet_data['reviews_average'],
+			'yotpoReviewCount' => $rich_snippet_data['reviews_count']));
+		}
+	}
+
+	// Use this hook for rich snippets
+	public function hookextraRight()
+	{
+		$this->assignProductRichSnippetsVars();
+
+		return $this->display(__FILE__,'views/templates/front/richSnippets.tpl');		
+	}
+
 	public function hookorderConfirmation($params)
 	{
 		$app_key = Configuration::get('yotpo_app_key');
@@ -217,10 +242,15 @@ class Yotpo extends Module
 			$smarty->assign('yotpoAppKey', $app_key);
 
 			$products_arr = '';
+			$link = new Link();
 			foreach ($products as $k => $product) {
+				$productUrl = $link->getProductLink($product['product_id']);
 				$products_arr = $products_arr . '{' .
 												'productId: "' . $product['product_id'] . '",' .
-      									'productName: "' . addslashes($product['product_name']) . '",' .
+												'productUrl: "' . $productUrl . '",' . 
+												'productName: "' . addslashes($product['product_name']) . '",' .
+												'productImage: "' . $this->getProductImageUrl($product['product_id']) . '",' .
+												'productDescription: "' . addslashes($this->getDescritpionById((int)$product['product_id'], (int)$params['objOrder']->id_lang)) . '",' .
       									'productPrice: "' . $product['product_price'] . '"' .
 												'}';
 				$products_arr = $products_arr . ', ';
@@ -333,6 +363,15 @@ class Yotpo extends Module
 			return strip_tags($product['description_short']);
 
 		$full_product = new Product((int)$product['id_product'], false, (int)$lang_id);
+		return strip_tags($full_product->description);
+	}
+
+	private function getDescritpionById($product_id,$lang_id)
+	{
+		if (!empty($product['description_short']))
+			return strip_tags($product['description_short']);
+
+		$full_product = new Product($product_id, false, (int)$lang_id);
 		return strip_tags($full_product->description);
 	}
 
@@ -548,7 +587,7 @@ class Yotpo extends Module
 
 				if ($is_success)
 				{
-					Configuration::updateValue('yotpo_past_orders', 1, false);
+					//Configuration::updateValue('yotpo_past_orders', 1, false);
 					$this->prepareSuccess('Past orders sent successfully');
 				}	
 			}
@@ -760,6 +799,9 @@ class Yotpo extends Module
 				if (!is_null($res))
 					$orders[] = $res;
 			}
+
+			PrestaShopLogger::addLog('total # of orders to send to YotPo: ' . sizeof($orders));
+
 			$post_bulk_orders = array_chunk($orders, self::BULK_SIZE);
 			$data = array();
 			foreach ($post_bulk_orders as $index => $bulk)
@@ -768,6 +810,9 @@ class Yotpo extends Module
 				$data[$index]['orders'] = $bulk;
 				$data[$index]['platform'] = 'prestashop';			
 			}
+			
+			PrestaShopLogger::addLog('# of chunks to send to YotPo: ' . sizeof($data));
+			
 			return $data;
 		}
 		return null;
@@ -809,6 +854,7 @@ class Yotpo extends Module
 					$expiration_time = null;
 					$request_result = $this->httpClient()->makeRichSnippetRequest(Configuration::get('yotpo_app_key'),$product_id);
 					if($request_result['status_code'] == 200) {
+						/*
 						if ($request_result['json'] == true) {
 							$result['ttl'] = $request_result['response']['rich_snippet']['ttl'];
 							$result['reviews_average'] = $request_result['response']['rich_snippet']['reviews_average'];
@@ -827,6 +873,20 @@ class Yotpo extends Module
 							unset($matches);
 						}	
 						if(isset($result['ttl']) && is_numeric($result['ttl']) && isset($result['reviews_average']) && isset($result['reviews_count'])) {
+							if($should_update_row) {
+								YotpoSnippetCache::updateCahce($product_id, $result);
+							}
+							else {
+								YotpoSnippetCache::addRichSnippetToCahce($product_id, $result);	
+							}								
+						}
+						*/
+						$result['reviews_average'] = $request_result['response']['bottomline']['average_score'];
+						$result['reviews_count'] = $request_result['response']['bottomline']['total_reviews'];
+						if(isset($result['reviews_average']) && isset($result['reviews_count'])) {
+							$expiration = time() + (24 * 60 * 60);
+							$result['ttl'] = date('Y-m-d H:i:s', $expiration);
+
 							if($should_update_row) {
 								YotpoSnippetCache::updateCahce($product_id, $result);
 							}
@@ -876,5 +936,5 @@ class Yotpo extends Module
             $smarty->force_compile = $value;
         }        
         return $template;
-    }
+		}
 }
