@@ -5,7 +5,7 @@ if (!defined('_PS_VERSION_'))
 
 class Yotpo extends Module
 {
-	const PAST_ORDERS_DAYS_BACK = 30;
+	const PAST_ORDERS_DAYS_BACK = 90;
 	const PAST_ORDERS_LIMIT = 10000;
 	const BULK_SIZE = 1;
 	private $_html = '';
