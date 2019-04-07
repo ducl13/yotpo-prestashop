@@ -160,7 +160,7 @@ Yotpo
                         yotpoAttributes += ' data-yotpo-element-id="' + yotpoE.attr('data-yotpo-element-id') + '"';
 
 - add after line 272 (after above addition):
-                                        html += '<div class="yotpo bottomLine yotpo-small">' + $(element).find('.yotpo').html() + '</div>';
+                                        html += '<div ' + yotpoAttributes + '>' + $(element).find('.yotpo').html() + '</div>';
 
 - add after line 306 (after above addition):
                         var yotpoE = $(element).find('.yotpo');
@@ -170,7 +170,7 @@ Yotpo
                         yotpoAttributes += ' data-yotpo-element-id="' + yotpoE.attr('data-yotpo-element-id') + '"';
 
 - add after line 323 (after above addition):
-                                html += '<div class="yotpo bottomLine yotpo-small">' + $(element).find('.yotpo').html() + '</div>';
+                                html += '<div ' + yotpoAttributes + '">' + $(element).find('.yotpo').html() + '</div>';
 
 
 Add new block on home page for Reviews Carousel
