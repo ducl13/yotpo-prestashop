@@ -132,7 +132,7 @@ Yotpo
 /*******************************************************
 Yotpo
 ********************************************************/
-.product_list .product-container .standalone-bottomline {
+.product_list.grid .product-container .standalone-bottomline {
     display: flex;
     justify-content: center;
     padding: 0 0 10px 0;
