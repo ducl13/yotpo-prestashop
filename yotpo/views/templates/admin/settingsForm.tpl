@@ -95,7 +95,7 @@
 	        <div class="y-label">{l s='In order to locate the bottom line in a custom position, please open the "root" folder, then enter the "themes" library. Locate the specific theme you would like the widget to show up on, and in this specific themes folder, locate the file "product.tpl". Add the code here, wherever you would like it placed.' mod='yotpo'}<br /><br /> 
 	          <div class="y-code">
 	            {literal}
-	            &lt;div class="yotpo bottomLine" style="margin-bottom: 20px;" <br>
+	            &lt;div class="yotpo bottomLine" <br>
 								data-product-id="{$yotpoProductId|intval}" <br>
 								data-url="{$yotpoProductLink|escape:'htmlall':'UTF-8'}"&gt; <br>
 	              &lt;/div&gt;
