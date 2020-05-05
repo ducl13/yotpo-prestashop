@@ -56,6 +56,17 @@ class YotpoHttpClient
 		}
 	}
 
+	public function createOrderRequest($data, $app_key, $secret_token)
+	{
+		$token = $this->grantOauthAccess($app_key, $secret_token);
+		if (!empty($token))
+		{
+			$data['platform'] = 'general';
+			$data['utoken'] = $token;
+		    return $this->makePostRequest(self::YOTPO_API_URL.'/apps/'.$app_key.'/purchases/', $data, 20);
+		}
+	}
+
 	public function makeMapRequest($data, $app_key, $secret_token)
 	{
 		$token = $this->grantOauthAccess($app_key, $secret_token);
@@ -75,6 +86,10 @@ class YotpoHttpClient
 	{		
 		$ch = curl_init($url);
 		list($is_json, $parsed_data) = YotpoHttpClient::jsonOrUrlEncode($data); 
+
+		// For debugging
+		//PrestaShopLogger::addLog($parsed_data);
+
 		$content_type = $is_json ? 'application/json' : 'application/x-www-form-urlencoded';                                                                                                                         
 		curl_setopt($ch, CURLOPT_CUSTOMREQUEST, 'POST');
 		curl_setopt($ch, CURLOPT_POSTFIELDS, $parsed_data);

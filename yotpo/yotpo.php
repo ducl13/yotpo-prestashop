@@ -23,7 +23,7 @@ class Yotpo extends Module
 		$version_test = $version_mask[0] > 0 && $version_mask[1] > 4;
 		$this->name = 'yotpo';
 		$this->tab = $version_test ? 'advertising_marketing' : 'Reviews';
-		$this->version = '1.4.4';
+		$this->version = '2.0.0';
 		if ($version_test)
 			$this->author = 'Yotpo';
 		$this->need_instance = 1;
@@ -226,7 +226,9 @@ class Yotpo extends Module
 
 	public function hookorderConfirmation($params)
 	{
-		$app_key = Configuration::get('yotpo_app_key');
+		$api_key = Configuration::get('yotpo_app_key');
+		$secret_token = Configuration::get('yotpo_oauth_token');
+
 		$order_id = !empty($params['objOrder']) && !empty($params['objOrder']->id) ? $params['objOrder']->id : null;
 		$order_amount = !empty($params['total_to_pay']) ? $params['total_to_pay'] : '';
 		$order_currency = !empty($params['currencyObj']) && !empty($params['currencyObj']->iso_code) ? $params['currencyObj']->iso_code : '';
@@ -235,47 +237,45 @@ class Yotpo extends Module
 		$customer_email = $customer->email;
 		$customer_name = addslashes($customer->firstname) . ' ' . addslashes($customer->lastname);
 		$products = !empty($params['objOrder']) ? $params['objOrder']->getProductsDetail() : null;
-		
-		if(!empty($app_key) && !is_null($order_id)) {
-			$smarty = $this->context->smarty;
 
-			$smarty->assign('yotpoAppKey', $app_key);
+		if(!empty($api_key) && !is_null($order_id)) {
+			$data = array();
+			$data['email'] = $customer_email;
+			$data['customer_name'] = $customer_name;
+			$data['order_id'] = strval($order_id);
+			$data['order_date'] =(new DateTime($order_date))->format('Y-m-d');
+			$data['currency_iso'] = $order_currency;		
 
-			$products_arr = '';
+			$products_arr = array();
 			$link = new Link();
-			foreach ($products as $k => $product) {
+			foreach ($products as $product) 
+			{
 				$productUrl = $link->getProductLink($product['product_id']);
-				$products_arr = $products_arr . '{' .
-												'productId: "' . $product['product_id'] . '",' .
-												'productUrl: "' . $productUrl . '",' . 
-												'productName: "' . addslashes($product['product_name']) . '",' .
-												'productImage: "' . $this->getProductImageUrl($product['product_id']) . '",' .
-												'productDescription: "' . addslashes($this->getDescritpionById((int)$product['product_id'], (int)$params['objOrder']->id_lang)) . '",' .
-      									'productPrice: "' . $product['product_price'] . '"' .
-												'}';
-				$products_arr = $products_arr . ', ';
+				$product_data = array();
+				$product_data['url'] = $productUrl; 
+				$product_data['name'] = $product['product_name'];
+				$product_data['image'] = $this->getProductImageUrl((int)$product['product_id']);
+				//$product_data['description'] = "You\\'re";
+				$product_data['description'] = str_replace("'", "\\'", html_entity_decode($this->getDescritpionById((int)$product['product_id'], (int)$params['objOrder']->id_lang)));
+				$product_data['price'] = number_format((float)$product['product_price'], 2, '.', '');
+				$products_arr[(int)$product['product_id']] = $product_data;
 			}
-			$products_arr = rtrim($products_arr, ', ');
-
-			$trackConversionData = '{orderId: "' . $order_id . 
-														'", orderAmount: "' . $order_amount . 
-														'", orderCurrency: "' . $order_currency . 
-														'", orderDate: "' . $order_date .
-														'", customerEmail: "' . $customer_email .
-														'", customerName: "' . $customer_name .
-														'", products: [' . $products_arr . ']' .
-														'}';
-
-			$smarty->assign('yotpoTrackConversionData', $trackConversionData);
-
-			$conversion_params = "app_key="      .$app_key.
-                 				 "&order_id="    .$order_id.
-                 				 "&order_amount=".$order_amount.
-                 				 "&order_currency="  .$order_currency;
-			$conversion_url = "https://api.yotpo.com/conversion_tracking.gif?$conversion_params";
-			$smarty->assign('yotpoConversionUrl', $conversion_url);
-
-			return $this->display(__FILE__,'views/templates/front/conversionImage.tpl');
+			$data['products'] = $products_arr;
+			if ($api_key != '' && $secret_token != '')
+			{
+				$is_sucess = true;
+				$response = $this->httpClient()->createOrderRequest($data, $api_key, $secret_token);
+				if ($response['status_code'] != 200 && $is_success)
+				{
+					$is_success = false;
+					$this->prepareError($this->l($response['status_message']));
+				}
+				
+				if ($is_success)
+				{
+					$this->prepareSuccess('Order sent successfully');
+				}
+			}
 		}
 	}
 
