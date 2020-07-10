@@ -85,10 +85,7 @@ class YotpoHttpClient
 	public function makePostRequest($url, $data, $timeout = self::HTTP_REQUEST_TIMEOUT, $parse_result = true)
 	{		
 		$ch = curl_init($url);
-		list($is_json, $parsed_data) = YotpoHttpClient::jsonOrUrlEncode($data); 
-
-		// For debugging
-		//PrestaShopLogger::addLog($parsed_data);
+		list($is_json, $parsed_data) = YotpoHttpClient::jsonOrUrlEncode($data);
 
 		$content_type = $is_json ? 'application/json' : 'application/x-www-form-urlencoded';                                                                                                                         
 		curl_setopt($ch, CURLOPT_CUSTOMREQUEST, 'POST');
@@ -101,10 +98,17 @@ class YotpoHttpClient
 		$result = curl_exec($ch);
 		curl_close ($ch);
 		
-		PrestaShopLogger::addLog($result);
+		PrestaShopLogger::addLog('YotPo Result: ' . $result);
 
 		if($parse_result) {
-			return YotpoHttpClient::jsonDecode($result, true);	
+			$response = YotpoHttpClient::jsonDecode($result, true);
+
+			if ($response['status_code'] != 200) {
+				PrestaShopLogger::addLog('YotPo failed');
+
+				//PrestaShopLogger::addLog('PARSED DATA: ' . $parsed_data);
+			}
+			return $response;
 		}
 		else {
 			return $result;
