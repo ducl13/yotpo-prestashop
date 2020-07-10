@@ -23,7 +23,7 @@ class Yotpo extends Module
 		$version_test = $version_mask[0] > 0 && $version_mask[1] > 4;
 		$this->name = 'yotpo';
 		$this->tab = $version_test ? 'advertising_marketing' : 'Reviews';
-		$this->version = '2.0.0';
+		$this->version = '2.0.1';
 		if ($version_test)
 			$this->author = 'Yotpo';
 		$this->need_instance = 1;
